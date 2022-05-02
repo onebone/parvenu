@@ -7,12 +7,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 @Immutable
 class ParvenuEditorValue(
 	val parvenuString: ParvenuAnnotatedString,
-	val selection: ParvenuTextRange,
+	val selection: TextRange,
 	val composition: TextRange?
 )
 
 fun ParvenuEditorValue.toTextFieldValue() = TextFieldValue(
 	annotatedString = parvenuString.toAnnotatedString(),
-	selection = selection.toTextRange(),
+	selection = selection,
 	composition = composition
 )

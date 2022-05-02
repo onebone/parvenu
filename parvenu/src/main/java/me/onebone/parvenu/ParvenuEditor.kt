@@ -20,17 +20,17 @@ fun ParvenuEditor(
 			val newSelection = it.selection
 
 			val addedLength = it.text.length - value.parvenuString.text.length
-			val selectionDelta = newSelection.start - oldSelection.range.start + newSelection.length
+			val selectionDelta = newSelection.start - oldSelection.start + newSelection.length
 
 			val selectionMoved = addedLength == 0 && selectionDelta != 0
 
 			val newSpanStyles: List<ParvenuAnnotatedString.Range<SpanStyle>>
 
-			if (oldSelection.range.collapsed) {
+			if (oldSelection.collapsed) {
 				newSpanStyles = if (selectionMoved) {
 					value.parvenuString.spanStyles
 				} else {
-					val cursor = oldSelection.range.start
+					val cursor = oldSelection.start
 
 					value.parvenuString.spanStyles.map { range ->
 						if (cursor in range) {
@@ -51,16 +51,16 @@ fun ParvenuEditor(
 					value.parvenuString.spanStyles
 				} else {
 					value.parvenuString.spanStyles.map { range ->
-						if (oldSelection.range.start in range && oldSelection.range.end in range) {
+						if (oldSelection.start in range && oldSelection.end in range) {
 							range.copy(end = range.end + addedLength)
-						} else if (oldSelection.range.start in range) {
-							range.copy(end = oldSelection.range.start)
-						} else if (oldSelection.range.end in range) {
+						} else if (oldSelection.start in range) {
+							range.copy(end = oldSelection.start)
+						} else if (oldSelection.end in range) {
 							range.copy(
-								start = oldSelection.range.end - oldSelection.range.length,
-								end = range.end - oldSelection.range.length
+								start = oldSelection.end - oldSelection.length,
+								end = range.end - oldSelection.length
 							)
-						} else if (oldSelection.range.start <= range.start) {
+						} else if (oldSelection.start <= range.start) {
 							range.copy(
 								start = range.start + addedLength,
 								end = range.end + addedLength
@@ -72,12 +72,6 @@ fun ParvenuEditor(
 				}
 			}
 
-			val newParvenuSelection = ParvenuTextRange(
-				range = newSelection,
-				startInclusive = oldSelection.startInclusive,
-				endInclusive = oldSelection.endInclusive
-			)
-
 			onValueChange(
 				ParvenuEditorValue(
 					parvenuString = ParvenuAnnotatedString(
@@ -85,7 +79,7 @@ fun ParvenuEditor(
 						spanStyles = newSpanStyles,
 						paragraphStyles = emptyList() // TODO
 					),
-					selection = newParvenuSelection,
+					selection = it.selection,
 					composition = it.composition
 				)
 			)

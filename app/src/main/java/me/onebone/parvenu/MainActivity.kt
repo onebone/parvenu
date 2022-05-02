@@ -36,11 +36,7 @@ class MainActivity : ComponentActivity() {
                             ),
                         )
                     ),
-                    selection = ParvenuTextRange(
-                        range = TextRange.Zero,
-                        startInclusive = false,
-                        endInclusive = true
-                    ),
+                    selection = TextRange.Zero,
                     composition = null
                 )
             ) }
