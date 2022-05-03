@@ -100,21 +100,23 @@ class MainActivity : ComponentActivity() {
                                             listOf(
                                                 range.copy(end = selection.start),
                                                 range.copy(start = selection.end)
-                                            )
+                                            ).filter(nonEmptyPredicate)
                                         } else if (selection.start in range) {
                                             // SELECTION:     ---------
                                             // RANGE    : --------
                                             // REMAINDER: ____
                                             listOf(range.copy(end = selection.start))
+                                                .filter(nonEmptyPredicate)
                                         } else if (selection.end in range) {
                                             // SELECTION: ---------
                                             // RANGE    :      --------
                                             // REMAINDER:          ____
                                             listOf(range.copy(start = selection.end, end = range.end))
+                                                .filter(nonEmptyPredicate)
                                         } else {
                                             listOf(range)
                                         }
-                                    }.filter(nonEmptyPredicate)
+                                    }
                                 ),
                                 selection = selection,
                                 composition = editorValue.composition
