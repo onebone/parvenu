@@ -20,6 +20,9 @@ class ParvenuAnnotatedString(
 		operator fun contains(index: Int): Boolean =
 			(start < index || (startInclusive && start == index))
 					&& (index < end || (endInclusive && end == index))
+
+		operator fun contains(other: Range<*>): Boolean =
+			contains(other.start) && contains(other.end)
 	}
 }
 

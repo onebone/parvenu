@@ -15,7 +15,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -47,25 +46,57 @@ class MainActivity : ComponentActivity() {
                 )
             ) }
 
+            val italic = SpanStyle(fontStyle = FontStyle.Italic)
+
             Column(modifier = Modifier.fillMaxSize()) {
                 Button(
                     onClick = {
                         val selection = editorValue.selection
 
-                        if (editorValue.parvenuString.spanStyles.any {
-                            it.item.fontStyle == FontStyle.Italic
-                                    && (selection.start in it || selection.end in it)
-                        }) {
+                        val fillRanges = editorValue.parvenuString.spanStyles.fillsRange(
+                            selection.start, selection.end
+                        ) {
+                            it.fontStyle == FontStyle.Italic
+                        }
+
+                        println(editorValue.parvenuString.spanStyles.joinToString("\n") {
+                            "${it.start}..${it.end} => style=${it.item.fontStyle}, weight=${it.item.fontWeight}"
+                        })
+                        println("fillRanges=$fillRanges")
+                        println()
+
+                        if (
+                            !fillRanges
+                        ) {
+                            editorValue = ParvenuEditorValue(
+                                parvenuString = ParvenuAnnotatedString(
+                                    text = editorValue.parvenuString.text,
+                                    spanStyles = editorValue.parvenuString.spanStyles + ParvenuAnnotatedString.Range(
+                                        item = italic,
+                                        start = selection.start, end = selection.end,
+                                        startInclusive = false, endInclusive = true
+                                    )
+                                ),
+                                selection = editorValue.selection,
+                                composition = editorValue.composition
+                            )
+                        } else {
+                            val nonEmptyPredicate: (ParvenuAnnotatedString.Range<*>) -> Boolean = {
+                                it.start != it.end
+                            }
+
                             editorValue = ParvenuEditorValue(
                                 parvenuString = ParvenuAnnotatedString(
                                     text = editorValue.parvenuString.text,
                                     spanStyles = editorValue.parvenuString.spanStyles.flatMap { range ->
                                         if (range.item.fontStyle != FontStyle.Italic) return@flatMap listOf(range)
 
-                                        if (selection.start == range.start && selection.end == range.end) {
-                                            println("remove")
-                                            listOf()
-                                        } else if (selection.start in range && selection.end in range) {
+                                        if (selection.start <= range.start && range.end <= selection.end) {
+                                            emptyList()
+                                        } else if (range.start <= selection.start && selection.end <= range.end) {
+                                            // SELECTION:      -----
+                                            // RANGE    :    ----------
+                                            // REMAINDER:    __     ___
                                             listOf(
                                                 range.copy(end = selection.start),
                                                 range.copy(start = selection.end)
@@ -73,38 +104,19 @@ class MainActivity : ComponentActivity() {
                                         } else if (selection.start in range) {
                                             // SELECTION:     ---------
                                             // RANGE    : --------
-                                            // REMAINDER: ____    _____
-                                            listOf(
-                                                range.copy(end = selection.start),
-                                                range.copy(start = range.end, end = selection.end)
-                                            )
+                                            // REMAINDER: ____
+                                            listOf(range.copy(end = selection.start))
                                         } else if (selection.end in range) {
                                             // SELECTION: ---------
                                             // RANGE    :      --------
-                                            // REMAINDER: ____     ____
-                                            listOf(
-                                                range.copy(start = selection.start, end = range.start),
-                                                range.copy(start = range.start)
-                                            )
+                                            // REMAINDER:          ____
+                                            listOf(range.copy(start = selection.end, end = range.end))
                                         } else {
                                             listOf(range)
                                         }
-                                    }
+                                    }.filter(nonEmptyPredicate)
                                 ),
                                 selection = selection,
-                                composition = editorValue.composition
-                            )
-                        } else {
-                            editorValue = ParvenuEditorValue(
-                                parvenuString = ParvenuAnnotatedString(
-                                    text = editorValue.parvenuString.text,
-                                    spanStyles = editorValue.parvenuString.spanStyles + ParvenuAnnotatedString.Range(
-                                        item = SpanStyle(fontStyle = FontStyle.Italic),
-                                        start = selection.start, end = selection.end,
-                                        startInclusive = false, endInclusive = true
-                                    )
-                                ),
-                                selection = editorValue.selection,
                                 composition = editorValue.composition
                             )
                         }
@@ -130,5 +142,19 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(first: Int, end: Int, block: (T) -> Boolean): Boolean {
+        val ranges = filter { block(it.item) }.sortedBy { it.start }
+        var leftover = first..end
+
+        for (range in ranges) {
+            if (leftover.first < range.start) return false
+            if (end <= range.end) return true
+
+            leftover = range.end..end
+        }
+
+        return false
     }
 }
