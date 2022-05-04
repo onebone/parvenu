@@ -3,18 +3,18 @@ package me.onebone.parvenu
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -46,49 +46,25 @@ class MainActivity : ComponentActivity() {
 				)
 			) }
 
-			val italic = SpanStyle(fontStyle = FontStyle.Italic)
-
 			Column(modifier = Modifier.fillMaxSize()) {
-				Button(
-					onClick = {
-						val selection = editorValue.selection
-
-						val spanFillsRange = if (selection.collapsed) {
-							val cursor = selection.start
-
-							editorValue.parvenuString.spanStyles.any {
-								// always consider as inclusive-inclusive range
-								it.start <= cursor && cursor <= it.end
-							}
-						} else {
-							editorValue.parvenuString.spanStyles.fillsRange(
-								selection.start, selection.end
-							) {
-								it.fontStyle == FontStyle.Italic
-							}
-						}
-
-						if (!spanFillsRange) {
-							editorValue = editorValue.plusSpanStyle(
-								ParvenuAnnotatedString.Range(
-									item = italic,
-									start = selection.start, end = selection.end,
-									startInclusive = false, endInclusive = true
-								)
-							)
-						} else {
-							editorValue = editorValue.copy(
-								parvenuString = ParvenuAnnotatedString(
-									text = editorValue.parvenuString.text,
-									spanStyles = editorValue.parvenuString.spanStyles.minusSpansInRange(selection.start, selection.end) { style ->
-										style.fontStyle == FontStyle.Italic
-									}
-								)
-							)
-						}
+				ParvenuSpanToggle(
+					value = editorValue,
+					onValueChange = {
+						editorValue = it
+					},
+					spanFactory = { SpanStyle(fontStyle = FontStyle.Italic) },
+					spanEqualPredicate = { style ->
+						style.fontStyle == FontStyle.Italic
 					}
-				) {
-					Text("italic")
+				) { enabled, onToggle ->
+					Text(
+						modifier = Modifier
+							.clickable { onToggle() }
+							.alpha(if (enabled) 1f else 0.3f)
+							.background(Color.Gray)
+							.padding(8.dp),
+						text = "italic"
+					)
 				}
 
 				ParvenuEditor(

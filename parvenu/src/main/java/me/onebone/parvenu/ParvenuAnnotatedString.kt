@@ -60,9 +60,9 @@ fun <T> ParvenuAnnotatedString.Range<T>.toAnnotatedStringRange() = AnnotatedStri
 	start = start, end = end
 )
 
-fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(first: Int, end: Int, block: (T) -> Boolean): Boolean {
+fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(start: Int, end: Int, block: (T) -> Boolean): Boolean {
 	val ranges = filter { block(it.item) }.sortedBy { it.start }
-	var leftover = first..end
+	var leftover = start..end
 
 	for (range in ranges) {
 		if (leftover.first < range.start) return false
@@ -95,20 +95,20 @@ inline fun <T> List<ParvenuAnnotatedString.Range<T>>.minusSpansInRange(
 		// RANGE    :    ----------
 		// REMAINDER:    __     ___
 		listOf(
-			range.copy(end = start, endInclusive = false),
-			range.copy(start = endExclusive, startInclusive = false)
+			range.copy(end = start),
+			range.copy(start = endExclusive)
 		).filter(NonEmptyRangePredicate)
 	} else if (start in range) {
 		// SELECTION:     ---------
 		// RANGE    : --------
 		// REMAINDER: ____
-		listOf(range.copy(end = start, endInclusive = false))
+		listOf(range.copy(end = start))
 			.filter(NonEmptyRangePredicate)
 	} else if (endExclusive in range) {
 		// SELECTION: ---------
 		// RANGE    :      --------
 		// REMAINDER:          ____
-		listOf(range.copy(start = endExclusive, end = range.end, startInclusive = false))
+		listOf(range.copy(start = endExclusive))
 			.filter(NonEmptyRangePredicate)
 	} else {
 		listOf(range)
