@@ -17,6 +17,12 @@ class ParvenuAnnotatedString(
 		val start: Int, val end: Int,
 		val startInclusive: Boolean, val endInclusive: Boolean
 	) {
+		init {
+			require(start <= end) {
+				"invalid range ($start > $end)"
+			}
+		}
+
 		operator fun contains(index: Int): Boolean =
 			(start < index || (startInclusive && start == index))
 					&& (index < end || (endInclusive && end == index))
@@ -72,34 +78,37 @@ fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(first: Int, end: In
 	it.start != it.end
 }
 
+/**
+ *
+ */
 inline fun <T> List<ParvenuAnnotatedString.Range<T>>.minusSpansInRange(
 	start: Int,
-	end: Int,
+	endExclusive: Int,
 	predicate: (T) -> Boolean
 ): List<ParvenuAnnotatedString.Range<T>> = flatMap { range ->
 	if (!predicate(range.item)) return listOf(range)
 
-	if (start <= range.start && range.end <= end) {
+	if (start <= range.start && range.end < endExclusive) {
 		emptyList()
-	} else if (range.start <= start && end <= range.end) {
+	} else if (range.start <= start && endExclusive <= range.end) {
 		// SELECTION:      -----
 		// RANGE    :    ----------
 		// REMAINDER:    __     ___
 		listOf(
-			range.copy(end = start),
-			range.copy(start = end)
+			range.copy(end = start, endInclusive = false),
+			range.copy(start = endExclusive, startInclusive = false)
 		).filter(NonEmptyRangePredicate)
 	} else if (start in range) {
 		// SELECTION:     ---------
 		// RANGE    : --------
 		// REMAINDER: ____
-		listOf(range.copy(end = start))
+		listOf(range.copy(end = start, endInclusive = false))
 			.filter(NonEmptyRangePredicate)
-	} else if (end in range) {
+	} else if (endExclusive in range) {
 		// SELECTION: ---------
 		// RANGE    :      --------
 		// REMAINDER:          ____
-		listOf(range.copy(start = end, end = range.end))
+		listOf(range.copy(start = endExclusive, end = range.end, startInclusive = false))
 			.filter(NonEmptyRangePredicate)
 	} else {
 		listOf(range)

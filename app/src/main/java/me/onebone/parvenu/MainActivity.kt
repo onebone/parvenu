@@ -53,10 +53,19 @@ class MainActivity : ComponentActivity() {
 					onClick = {
 						val selection = editorValue.selection
 
-						val spanFillsRange = editorValue.parvenuString.spanStyles.fillsRange(
-							selection.start, selection.end
-						) {
-							it.fontStyle == FontStyle.Italic
+						val spanFillsRange = if (selection.collapsed) {
+							val cursor = selection.start
+
+							editorValue.parvenuString.spanStyles.any {
+								// always consider as inclusive-inclusive range
+								it.start <= cursor && cursor <= it.end
+							}
+						} else {
+							editorValue.parvenuString.spanStyles.fillsRange(
+								selection.start, selection.end
+							) {
+								it.fontStyle == FontStyle.Italic
+							}
 						}
 
 						if (!spanFillsRange) {

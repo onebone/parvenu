@@ -32,9 +32,13 @@ fun ParvenuEditor(
 				} else {
 					val cursor = oldSelection.start
 
-					value.parvenuString.spanStyles.map { range ->
+					value.parvenuString.spanStyles.mapNotNull { range ->
 						if (cursor in range) {
-							range.copy(end = range.end + selectionDelta)
+							if (range.end + selectionDelta < range.start) {
+								null
+							} else {
+								range.copy(end = range.end + selectionDelta)
+							}
 						} else if (cursor <= range.start) {
 							// if cursor == range.start, then range.startInclusive == false.
 							range.copy(
