@@ -6,13 +6,13 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 
 @Immutable
-class ParvenuAnnotatedString(
-	val text: String,
-	val spanStyles: List<Range<SpanStyle>> = emptyList(),
-	val paragraphStyles: List<Range<ParagraphStyle>> = emptyList()
+public class ParvenuAnnotatedString(
+	public val text: String,
+	public val spanStyles: List<Range<SpanStyle>> = emptyList(),
+	public val paragraphStyles: List<Range<ParagraphStyle>> = emptyList()
 ) {
 	@Immutable
-	data class Range<out T>(
+	public data class Range<out T>(
 		val item: T,
 		val start: Int, val end: Int,
 		val startInclusive: Boolean, val endInclusive: Boolean
@@ -23,15 +23,15 @@ class ParvenuAnnotatedString(
 			}
 		}
 
-		operator fun contains(index: Int): Boolean =
+		public operator fun contains(index: Int): Boolean =
 			(start < index || (startInclusive && start == index))
 					&& (index < end || (endInclusive && end == index))
 
-		operator fun contains(other: Range<*>): Boolean =
+		public operator fun contains(other: Range<*>): Boolean =
 			contains(other.start) && contains(other.end)
 	}
 
-	fun copy(
+	public fun copy(
 		text: String = this.text,
 		spanStyles: List<Range<SpanStyle>> = this.spanStyles,
 		paragraphStyles: List<Range<ParagraphStyle>> = this.paragraphStyles
@@ -42,7 +42,7 @@ class ParvenuAnnotatedString(
 	)
 }
 
-fun ParvenuAnnotatedString.toAnnotatedString(): AnnotatedString = AnnotatedString(
+public fun ParvenuAnnotatedString.toAnnotatedString(): AnnotatedString = AnnotatedString(
 	text = text,
 	spanStyles = spanStyles.mapNotNull {
 		if (it.start == it.end) {
@@ -55,12 +55,12 @@ fun ParvenuAnnotatedString.toAnnotatedString(): AnnotatedString = AnnotatedStrin
 	paragraphStyles = paragraphStyles.map { it.toAnnotatedStringRange() }
 )
 
-fun <T> ParvenuAnnotatedString.Range<T>.toAnnotatedStringRange() = AnnotatedString.Range(
+public fun <T> ParvenuAnnotatedString.Range<T>.toAnnotatedStringRange(): AnnotatedString.Range<T> = AnnotatedString.Range(
 	item = item,
 	start = start, end = end
 )
 
-fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(start: Int, end: Int, block: (T) -> Boolean): Boolean {
+public fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(start: Int, end: Int, block: (T) -> Boolean): Boolean {
 	val ranges = filter { block(it.item) }.sortedBy { it.start }
 	var leftover = start..end
 
@@ -83,7 +83,7 @@ fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(start: Int, end: In
 /**
  * Removes spans in range [[start], [endExclusive]).
  */
-inline fun <T> List<ParvenuAnnotatedString.Range<T>>.minusSpansInRange(
+public inline fun <T> List<ParvenuAnnotatedString.Range<T>>.minusSpansInRange(
 	start: Int,
 	endExclusive: Int,
 	predicate: (T) -> Boolean

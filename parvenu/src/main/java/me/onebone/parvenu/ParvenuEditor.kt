@@ -5,7 +5,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 
 @Composable
-fun ParvenuEditor(
+public fun ParvenuEditor(
 	value: ParvenuEditorValue,
 	onValueChange: (ParvenuEditorValue) -> Unit,
 	block: @Composable (

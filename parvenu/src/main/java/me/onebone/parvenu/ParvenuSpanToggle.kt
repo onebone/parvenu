@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.SpanStyle
 
 @Composable
-fun ParvenuSpanToggle(
+public fun ParvenuSpanToggle(
 	value: ParvenuEditorValue,
 	onValueChange: (ParvenuEditorValue) -> Unit,
 	spanFactory: () -> SpanStyle,

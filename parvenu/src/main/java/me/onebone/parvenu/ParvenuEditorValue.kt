@@ -7,31 +7,31 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 
 @Immutable
-class ParvenuEditorValue(
-	val parvenuString: ParvenuAnnotatedString,
-	val selection: TextRange,
-	val composition: TextRange?
+public class ParvenuEditorValue(
+	public val parvenuString: ParvenuAnnotatedString,
+	public val selection: TextRange,
+	public val composition: TextRange?
 ) {
-	fun copy(
+	public fun copy(
 		parvenuString: ParvenuAnnotatedString = this.parvenuString,
 		selection: TextRange = this.selection,
 		composition: TextRange? = this.composition
-	) = ParvenuEditorValue(
+	): ParvenuEditorValue = ParvenuEditorValue(
 		parvenuString = parvenuString,
 		selection = selection,
 		composition = composition
 	)
 }
 
-fun ParvenuEditorValue.toTextFieldValue() = TextFieldValue(
+public fun ParvenuEditorValue.toTextFieldValue(): TextFieldValue = TextFieldValue(
 	annotatedString = parvenuString.toAnnotatedString(),
 	selection = selection,
 	composition = composition
 )
 
-fun ParvenuEditorValue.plusSpanStyle(
+public fun ParvenuEditorValue.plusSpanStyle(
 	spanStyle: ParvenuAnnotatedString.Range<SpanStyle>
-) = ParvenuEditorValue(
+): ParvenuEditorValue = ParvenuEditorValue(
 	parvenuString = parvenuString.copy(
 		spanStyles = parvenuString.spanStyles + spanStyle
 	),
@@ -39,9 +39,9 @@ fun ParvenuEditorValue.plusSpanStyle(
 	composition = composition
 )
 
-fun ParvenuEditorValue.plusParagraphStyle(
+public fun ParvenuEditorValue.plusParagraphStyle(
 	paragraphStyle: ParvenuAnnotatedString.Range<ParagraphStyle>
-) = ParvenuEditorValue(
+): ParvenuEditorValue = ParvenuEditorValue(
 	parvenuString = parvenuString.copy(
 		paragraphStyles = parvenuString.paragraphStyles + paragraphStyle
 	),
