@@ -86,7 +86,7 @@ inline fun <T> List<ParvenuAnnotatedString.Range<T>>.minusSpansInRange(
 	endExclusive: Int,
 	predicate: (T) -> Boolean
 ): List<ParvenuAnnotatedString.Range<T>> = flatMap { range ->
-	if (!predicate(range.item)) return listOf(range)
+	if (!predicate(range.item)) return@flatMap listOf(range)
 
 	if (start <= range.start && range.end < endExclusive) {
 		emptyList()
@@ -95,14 +95,14 @@ inline fun <T> List<ParvenuAnnotatedString.Range<T>>.minusSpansInRange(
 		// RANGE    :    ----------
 		// REMAINDER:    __     ___
 		listOf(
-			range.copy(end = start),
+			range.copy(end = start, endInclusive = false),
 			range.copy(start = endExclusive)
 		).filter(NonEmptyRangePredicate)
 	} else if (start in range) {
 		// SELECTION:     ---------
 		// RANGE    : --------
 		// REMAINDER: ____
-		listOf(range.copy(end = start))
+		listOf(range.copy(end = start, endInclusive = false))
 			.filter(NonEmptyRangePredicate)
 	} else if (endExclusive in range) {
 		// SELECTION: ---------
