@@ -43,3 +43,17 @@ fun <T> ParvenuAnnotatedString.Range<T>.toAnnotatedStringRange() = AnnotatedStri
 	item = item,
 	start = start, end = end
 )
+
+fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(first: Int, end: Int, block: (T) -> Boolean): Boolean {
+	val ranges = filter { block(it.item) }.sortedBy { it.start }
+	var leftover = first..end
+
+	for (range in ranges) {
+		if (leftover.first < range.start) return false
+		if (end <= range.end) return true
+
+		leftover = range.end..end
+	}
+
+	return false
+}
