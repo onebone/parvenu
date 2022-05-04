@@ -28,7 +28,14 @@ class ParvenuAnnotatedString(
 
 fun ParvenuAnnotatedString.toAnnotatedString(): AnnotatedString = AnnotatedString(
 	text = text,
-	spanStyles = spanStyles.map { it.toAnnotatedStringRange() },
+	spanStyles = spanStyles.mapNotNull {
+		if (it.start == it.end) {
+			// AnnotatedString might behave wrongly if there are some zero-length spans
+			null
+		} else {
+			it.toAnnotatedStringRange()
+		}
+	},
 	paragraphStyles = paragraphStyles.map { it.toAnnotatedStringRange() }
 )
 
