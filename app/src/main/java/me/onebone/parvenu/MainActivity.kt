@@ -59,12 +59,6 @@ class MainActivity : ComponentActivity() {
 							it.fontStyle == FontStyle.Italic
 						}
 
-						println(editorValue.parvenuString.spanStyles.joinToString("\n") {
-							"${it.start}..${it.end} => style=${it.item.fontStyle}, weight=${it.item.fontWeight}"
-						})
-						println("fillRanges=$spanFillsRange")
-						println()
-
 						if (!spanFillsRange) {
 							editorValue = editorValue.plusSpanStyle(
 								ParvenuAnnotatedString.Range(
