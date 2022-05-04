@@ -22,22 +22,26 @@ fun ParvenuEditor(
 			val addedLength = it.text.length - value.parvenuString.text.length
 			val selectionDelta = newSelection.start - oldSelection.start + newSelection.length
 
-			val selectionMoved = addedLength == 0 && selectionDelta != 0
+			val onlySelectionMoved = addedLength == 0 && selectionDelta != 0
 
 			val newSpanStyles: List<ParvenuAnnotatedString.Range<SpanStyle>>
 
 			if (oldSelection.collapsed) {
-				newSpanStyles = if (selectionMoved) {
+				newSpanStyles = if (onlySelectionMoved) {
 					value.parvenuString.spanStyles
 				} else {
 					val cursor = oldSelection.start
 
 					value.parvenuString.spanStyles.mapNotNull { range ->
-						if (cursor in range) {
+						val shouldExpandSpan = shouldExpandSpanOnTextAddition(range, cursor)
+
+						if (shouldExpandSpan || cursor in range) {
 							if (range.end + selectionDelta < range.start) {
 								null
-							} else {
+							} else if (selectionDelta < 0 || shouldExpandSpan) {
 								range.copy(end = range.end + selectionDelta)
+							} else {
+								range
 							}
 						} else if (cursor <= range.start) {
 							// if cursor == range.start, then range.startInclusive == false.
@@ -51,7 +55,7 @@ fun ParvenuEditor(
 					}
 				}
 			} else {
-				newSpanStyles = if (selectionMoved) {
+				newSpanStyles = if (onlySelectionMoved) {
 					value.parvenuString.spanStyles
 				} else {
 					value.parvenuString.spanStyles.map { range ->
@@ -89,4 +93,13 @@ fun ParvenuEditor(
 			)
 		}
 	)
+}
+
+internal fun shouldExpandSpanOnTextAddition(
+	range: ParvenuAnnotatedString.Range<*>,
+	cursor: Int
+): Boolean {
+	return (range.start < cursor && cursor < range.end)
+			|| (range.startInclusive && range.start == cursor)
+			|| (range.endInclusive && range.end == cursor)
 }
