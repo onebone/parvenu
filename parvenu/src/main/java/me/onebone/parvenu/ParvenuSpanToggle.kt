@@ -1,8 +1,7 @@
 package me.onebone.parvenu
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.SpanStyle
 
 @Composable
@@ -16,7 +15,7 @@ public fun ParvenuSpanToggle(
 		onToggle: () -> Unit
 	) -> Unit
 ) {
-	val enabled by derivedStateOf {
+	val enabled = remember(value) {
 		if (value.selection.collapsed) {
 			value.parvenuString.spanStyles.any { range ->
 				shouldExpandSpanOnTextAddition(range, value.selection.start)
