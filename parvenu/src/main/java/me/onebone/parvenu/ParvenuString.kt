@@ -77,8 +77,11 @@ public fun <T> ParvenuString.Range<T>.toAnnotatedStringRange(): AnnotatedString.
 	start = start, end = end
 )
 
-public fun <T> Iterable<ParvenuString.Range<T>>.fillsRange(start: Int, end: Int, block: (T) -> Boolean): Boolean {
-	val ranges = filter { block(it.item) }.sortedBy { it.start }
+/**
+ * Checks if [this] list of range fills [[start]..[end]) with items which meets [predicate].
+ */
+internal fun <T> Iterable<ParvenuString.Range<T>>.fillsRange(start: Int, end: Int, predicate: (T) -> Boolean): Boolean {
+	val ranges = filter { predicate(it.item) }.sortedBy { it.start }
 	var leftover = start..end
 
 	for (range in ranges) {
@@ -93,14 +96,14 @@ public fun <T> Iterable<ParvenuString.Range<T>>.fillsRange(start: Int, end: Int,
 	return false
 }
 
-@PublishedApi internal val NonEmptyRangePredicate: (ParvenuString.Range<*>) -> Boolean = {
+private val NonEmptyRangePredicate: (ParvenuString.Range<*>) -> Boolean = {
 	it.start != it.end
 }
 
 /**
  * Removes spans in range [[start], [endExclusive]).
  */
-public inline fun <T> List<ParvenuString.Range<T>>.minusSpansInRange(
+internal inline fun <T> List<ParvenuString.Range<T>>.minusSpansInRange(
 	start: Int,
 	endExclusive: Int,
 	predicate: (T) -> Boolean

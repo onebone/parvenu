@@ -29,7 +29,7 @@ public fun ParvenuEditorValue.toTextFieldValue(): TextFieldValue = TextFieldValu
 	composition = composition
 )
 
-public fun ParvenuEditorValue.plusSpanStyle(
+internal fun ParvenuEditorValue.plusSpanStyle(
 	spanStyle: ParvenuString.Range<SpanStyle>
 ): ParvenuEditorValue = ParvenuEditorValue(
 	parvenuString = parvenuString.copy(
@@ -39,7 +39,7 @@ public fun ParvenuEditorValue.plusSpanStyle(
 	composition = composition
 )
 
-public fun ParvenuEditorValue.plusParagraphStyle(
+internal fun ParvenuEditorValue.plusParagraphStyle(
 	paragraphStyle: ParvenuString.Range<ParagraphStyle>
 ): ParvenuEditorValue = ParvenuEditorValue(
 	parvenuString = parvenuString.copy(

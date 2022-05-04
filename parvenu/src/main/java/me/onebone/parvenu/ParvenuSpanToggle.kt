@@ -24,7 +24,7 @@ public fun ParvenuSpanToggle(
 			value.parvenuString.spanStyles.fillsRange(
 				start = value.selection.min,
 				end = value.selection.max,
-				block = spanEqualPredicate
+				predicate = spanEqualPredicate
 			)
 		}
 	}
