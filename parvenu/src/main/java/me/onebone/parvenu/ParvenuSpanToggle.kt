@@ -18,7 +18,7 @@ public fun ParvenuSpanToggle(
 	val enabled = remember(value) {
 		if (value.selection.collapsed) {
 			value.parvenuString.spanStyles.any { range ->
-				shouldExpandSpanOnTextAddition(range, value.selection.start)
+				spanEqualPredicate(range.item) && shouldExpandSpanOnTextAddition(range, value.selection.start)
 			}
 		} else {
 			value.parvenuString.spanStyles.fillsRange(
