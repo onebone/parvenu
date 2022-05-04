@@ -95,6 +95,13 @@ fun ParvenuEditor(
 	)
 }
 
+/**
+ * Returns `true` if the [range] should expand if a text is added at the [cursor].
+ *
+ * The behavior is slightly different from that of [ParvenuAnnotatedString.Range.contains], for
+ * example, range=[3, 3), cursor=3 returns true because a cursor should expand the span even if
+ * the range is empty as it is startInclusive.
+ */
 internal fun shouldExpandSpanOnTextAddition(
 	range: ParvenuAnnotatedString.Range<*>,
 	cursor: Int
