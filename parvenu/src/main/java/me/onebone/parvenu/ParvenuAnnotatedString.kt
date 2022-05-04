@@ -11,6 +11,20 @@ public class ParvenuAnnotatedString(
 	public val spanStyles: List<Range<SpanStyle>> = emptyList(),
 	public val paragraphStyles: List<Range<ParagraphStyle>> = emptyList()
 ) {
+	init {
+		spanStyles.forEach { range ->
+			require(0 <= range.start && range.end <= text.length) {
+				"span style is out of boundary (style=${range.toReadableString()}, text length=${text.length})"
+			}
+		}
+
+		paragraphStyles.forEach { range ->
+			require(0 <= range.start && range.end <= text.length) {
+				"paragraph style is out of boundary (style=${range.toReadableString()}, text length=${text.length})"
+			}
+		}
+	}
+
 	@Immutable
 	public data class Range<out T>(
 		val item: T,
@@ -41,6 +55,9 @@ public class ParvenuAnnotatedString(
 		paragraphStyles = paragraphStyles
 	)
 }
+
+internal fun ParvenuAnnotatedString.Range<*>.toReadableString(): String =
+	"${if (startInclusive) '[' else '('}$start..$end${if (endInclusive) ']' else ')'}"
 
 public fun ParvenuAnnotatedString.toAnnotatedString(): AnnotatedString = AnnotatedString(
 	text = text,

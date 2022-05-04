@@ -49,6 +49,10 @@ public fun ParvenuEditor(
 								start = range.start + addedLength,
 								end = range.end + addedLength
 							)
+						} else if (addedLength < 0) {
+							range.copy(
+								end = range.end + addedLength
+							)
 						} else {
 							range
 						}
