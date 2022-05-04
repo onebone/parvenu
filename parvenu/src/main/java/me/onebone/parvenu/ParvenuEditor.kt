@@ -24,12 +24,16 @@ public fun ParvenuEditor(
 
 			val onlySelectionMoved = addedLength == 0 && selectionDelta != 0
 
-			val newSpanStyles: List<ParvenuAnnotatedString.Range<SpanStyle>>
-
-			if (oldSelection.collapsed) {
-				newSpanStyles = if (onlySelectionMoved) {
-					value.parvenuString.spanStyles
-				} else {
+			if (onlySelectionMoved) {
+				onValueChange(
+					ParvenuEditorValue(
+						parvenuString = value.parvenuString,
+						selection = it.selection,
+						composition = it.composition
+					)
+				)
+			} else {
+				val newSpanStyles = if (oldSelection.collapsed) {
 					val cursor = oldSelection.start
 
 					value.parvenuString.spanStyles.mapNotNull { range ->
@@ -38,8 +42,8 @@ public fun ParvenuEditor(
 						if (shouldExpandSpan || cursor in range) {
 							if (range.end + selectionDelta < range.start) {
 								null
-							} else if (selectionDelta < 0 || shouldExpandSpan) {
-								range.copy(end = range.end + selectionDelta)
+							} else if (addedLength < 0 || shouldExpandSpan) {
+								range.copy(end = range.end + addedLength)
 							} else {
 								range
 							}
@@ -50,17 +54,17 @@ public fun ParvenuEditor(
 								end = range.end + addedLength
 							)
 						} else if (addedLength < 0) {
-							range.copy(
-								end = range.end + addedLength
-							)
+							if (range.end + addedLength < range.start) {
+								null
+							} else {
+								range.copy(
+									end = range.end + addedLength
+								)
+							}
 						} else {
 							range
 						}
 					}
-				}
-			} else {
-				newSpanStyles = if (onlySelectionMoved) {
-					value.parvenuString.spanStyles
 				} else {
 					value.parvenuString.spanStyles.map { range ->
 						if (oldSelection.min in range && oldSelection.max in range) {
@@ -82,19 +86,19 @@ public fun ParvenuEditor(
 						}
 					}
 				}
-			}
 
-			onValueChange(
-				ParvenuEditorValue(
-					parvenuString = ParvenuAnnotatedString(
-						text = it.text,
-						spanStyles = newSpanStyles,
-						paragraphStyles = emptyList() // TODO
-					),
-					selection = it.selection,
-					composition = it.composition
+				onValueChange(
+					ParvenuEditorValue(
+						parvenuString = ParvenuAnnotatedString(
+							text = it.text,
+							spanStyles = newSpanStyles,
+							paragraphStyles = emptyList() // TODO
+						),
+						selection = it.selection,
+						composition = it.composition
+					)
 				)
-			)
+			}
 		}
 	)
 }
