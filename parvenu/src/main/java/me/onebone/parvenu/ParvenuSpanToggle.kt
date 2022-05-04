@@ -23,8 +23,8 @@ fun ParvenuSpanToggle(
 			}
 		} else {
 			value.parvenuString.spanStyles.fillsRange(
-				start = value.selection.start,
-				end = value.selection.end,
+				start = value.selection.min,
+				end = value.selection.max,
 				block = spanEqualPredicate
 			)
 		}
@@ -39,7 +39,7 @@ fun ParvenuSpanToggle(
 				onValueChange(value.plusSpanStyle(
 					ParvenuAnnotatedString.Range(
 						item = spanFactory(),
-						start = selection.start, end = selection.end,
+						start = selection.min, end = selection.max,
 						startInclusive = false, endInclusive = true
 					)
 				))
@@ -48,8 +48,8 @@ fun ParvenuSpanToggle(
 					parvenuString = ParvenuAnnotatedString(
 						text = value.parvenuString.text,
 						spanStyles = value.parvenuString.spanStyles.minusSpansInRange(
-							start = selection.start,
-							endExclusive = selection.end,
+							start = selection.min,
+							endExclusive = selection.max,
 							predicate = spanEqualPredicate
 						),
 						paragraphStyles = emptyList()

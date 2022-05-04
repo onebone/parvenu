@@ -20,7 +20,7 @@ fun ParvenuEditor(
 			val newSelection = it.selection
 
 			val addedLength = it.text.length - value.parvenuString.text.length
-			val selectionDelta = newSelection.start - oldSelection.start + newSelection.length
+			val selectionDelta = newSelection.min - oldSelection.min + newSelection.length
 
 			val onlySelectionMoved = addedLength == 0 && selectionDelta != 0
 
@@ -59,16 +59,16 @@ fun ParvenuEditor(
 					value.parvenuString.spanStyles
 				} else {
 					value.parvenuString.spanStyles.map { range ->
-						if (oldSelection.start in range && oldSelection.end in range) {
+						if (oldSelection.min in range && oldSelection.max in range) {
 							range.copy(end = range.end + addedLength)
-						} else if (oldSelection.start in range) {
-							range.copy(end = oldSelection.start)
-						} else if (oldSelection.end in range) {
+						} else if (oldSelection.min in range) {
+							range.copy(end = oldSelection.min)
+						} else if (oldSelection.max in range) {
 							range.copy(
-								start = oldSelection.end - oldSelection.length,
+								start = oldSelection.max - oldSelection.length,
 								end = range.end - oldSelection.length
 							)
-						} else if (oldSelection.start <= range.start) {
+						} else if (oldSelection.min <= range.start) {
 							range.copy(
 								start = range.start + addedLength,
 								end = range.end + addedLength

@@ -65,6 +65,8 @@ fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(start: Int, end: In
 	var leftover = start..end
 
 	for (range in ranges) {
+		if (range.end < leftover.first) continue
+
 		if (leftover.first < range.start) return false
 		if (end <= range.end) return true
 
@@ -79,7 +81,7 @@ fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(start: Int, end: In
 }
 
 /**
- *
+ * Removes spans in range [[start], [endExclusive]).
  */
 inline fun <T> List<ParvenuAnnotatedString.Range<T>>.minusSpansInRange(
 	start: Int,
