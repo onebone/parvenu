@@ -12,7 +12,7 @@ class ParvenuAnnotatedString(
 	val paragraphStyles: List<Range<ParagraphStyle>> = emptyList()
 ) {
 	@Immutable
-	data class Range<T>(
+	data class Range<out T>(
 		val item: T,
 		val start: Int, val end: Int,
 		val startInclusive: Boolean, val endInclusive: Boolean
@@ -24,6 +24,16 @@ class ParvenuAnnotatedString(
 		operator fun contains(other: Range<*>): Boolean =
 			contains(other.start) && contains(other.end)
 	}
+
+	fun copy(
+		text: String = this.text,
+		spanStyles: List<Range<SpanStyle>> = this.spanStyles,
+		paragraphStyles: List<Range<ParagraphStyle>> = this.paragraphStyles
+	): ParvenuAnnotatedString = ParvenuAnnotatedString(
+		text = text,
+		spanStyles = spanStyles,
+		paragraphStyles = paragraphStyles
+	)
 }
 
 fun ParvenuAnnotatedString.toAnnotatedString(): AnnotatedString = AnnotatedString(
@@ -56,4 +66,42 @@ fun <T> Iterable<ParvenuAnnotatedString.Range<T>>.fillsRange(first: Int, end: In
 	}
 
 	return false
+}
+
+@PublishedApi internal val NonEmptyRangePredicate: (ParvenuAnnotatedString.Range<*>) -> Boolean = {
+	it.start != it.end
+}
+
+inline fun <T> List<ParvenuAnnotatedString.Range<T>>.minusSpansInRange(
+	start: Int,
+	end: Int,
+	predicate: (T) -> Boolean
+): List<ParvenuAnnotatedString.Range<T>> = flatMap { range ->
+	if (!predicate(range.item)) return listOf(range)
+
+	if (start <= range.start && range.end <= end) {
+		emptyList()
+	} else if (range.start <= start && end <= range.end) {
+		// SELECTION:      -----
+		// RANGE    :    ----------
+		// REMAINDER:    __     ___
+		listOf(
+			range.copy(end = start),
+			range.copy(start = end)
+		).filter(NonEmptyRangePredicate)
+	} else if (start in range) {
+		// SELECTION:     ---------
+		// RANGE    : --------
+		// REMAINDER: ____
+		listOf(range.copy(end = start))
+			.filter(NonEmptyRangePredicate)
+	} else if (end in range) {
+		// SELECTION: ---------
+		// RANGE    :      --------
+		// REMAINDER:          ____
+		listOf(range.copy(start = end, end = range.end))
+			.filter(NonEmptyRangePredicate)
+	} else {
+		listOf(range)
+	}
 }
