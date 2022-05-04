@@ -30,10 +30,10 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			var editorValue by remember { mutableStateOf(
 				ParvenuEditorValue(
-					parvenuString = ParvenuAnnotatedString(
+					parvenuString = ParvenuString(
 						text = "normal bold",
 						spanStyles = listOf(
-							ParvenuAnnotatedString.Range(
+							ParvenuString.Range(
 								item = SpanStyle(fontWeight = FontWeight.Bold),
 								start = 7, end = 11,
 								startInclusive = false,

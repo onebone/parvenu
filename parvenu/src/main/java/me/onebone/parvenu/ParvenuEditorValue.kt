@@ -8,12 +8,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 
 @Immutable
 public class ParvenuEditorValue(
-	public val parvenuString: ParvenuAnnotatedString,
+	public val parvenuString: ParvenuString,
 	public val selection: TextRange,
 	public val composition: TextRange?
 ) {
 	public fun copy(
-		parvenuString: ParvenuAnnotatedString = this.parvenuString,
+		parvenuString: ParvenuString = this.parvenuString,
 		selection: TextRange = this.selection,
 		composition: TextRange? = this.composition
 	): ParvenuEditorValue = ParvenuEditorValue(
@@ -30,7 +30,7 @@ public fun ParvenuEditorValue.toTextFieldValue(): TextFieldValue = TextFieldValu
 )
 
 public fun ParvenuEditorValue.plusSpanStyle(
-	spanStyle: ParvenuAnnotatedString.Range<SpanStyle>
+	spanStyle: ParvenuString.Range<SpanStyle>
 ): ParvenuEditorValue = ParvenuEditorValue(
 	parvenuString = parvenuString.copy(
 		spanStyles = parvenuString.spanStyles + spanStyle
@@ -40,7 +40,7 @@ public fun ParvenuEditorValue.plusSpanStyle(
 )
 
 public fun ParvenuEditorValue.plusParagraphStyle(
-	paragraphStyle: ParvenuAnnotatedString.Range<ParagraphStyle>
+	paragraphStyle: ParvenuString.Range<ParagraphStyle>
 ): ParvenuEditorValue = ParvenuEditorValue(
 	parvenuString = parvenuString.copy(
 		paragraphStyles = parvenuString.paragraphStyles + paragraphStyle

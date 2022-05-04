@@ -1,7 +1,6 @@
 package me.onebone.parvenu
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 
 @Composable
@@ -89,7 +88,7 @@ public fun ParvenuEditor(
 
 				onValueChange(
 					ParvenuEditorValue(
-						parvenuString = ParvenuAnnotatedString(
+						parvenuString = ParvenuString(
 							text = it.text,
 							spanStyles = newSpanStyles,
 							paragraphStyles = emptyList() // TODO
@@ -106,12 +105,12 @@ public fun ParvenuEditor(
 /**
  * Returns `true` if the [range] should expand if a text is added at the [cursor].
  *
- * The behavior is slightly different from that of [ParvenuAnnotatedString.Range.contains], for
+ * The behavior is slightly different from that of [ParvenuString.Range.contains], for
  * example, range=[3, 3), cursor=3 returns true because a cursor should expand the span even if
  * the range is empty as it is startInclusive.
  */
 internal fun shouldExpandSpanOnTextAddition(
-	range: ParvenuAnnotatedString.Range<*>,
+	range: ParvenuString.Range<*>,
 	cursor: Int
 ): Boolean {
 	return (range.start < cursor && cursor < range.end)

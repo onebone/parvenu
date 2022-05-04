@@ -36,7 +36,7 @@ public fun ParvenuSpanToggle(
 
 			if (!enabled) {
 				onValueChange(value.plusSpanStyle(
-					ParvenuAnnotatedString.Range(
+					ParvenuString.Range(
 						item = spanFactory(),
 						start = selection.min, end = selection.max,
 						startInclusive = false, endInclusive = true
@@ -44,7 +44,7 @@ public fun ParvenuSpanToggle(
 				))
 			} else {
 				onValueChange(value.copy(
-					parvenuString = ParvenuAnnotatedString(
+					parvenuString = ParvenuString(
 						text = value.parvenuString.text,
 						spanStyles = value.parvenuString.spanStyles.minusSpansInRange(
 							start = selection.min,
