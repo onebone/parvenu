@@ -1,7 +1,9 @@
 package me.onebone.parvenu
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import kotlin.math.min
 
 @Composable
 public fun ParvenuEditor(
@@ -19,11 +21,10 @@ public fun ParvenuEditor(
 			val newSelection = it.selection
 
 			val addedLength = it.text.length - value.parvenuString.text.length
-			val selectionDelta = newSelection.min - oldSelection.min + newSelection.length
 
-			val onlySelectionMoved = addedLength == 0 && selectionDelta != 0
+			val textChanged = hasTextChanged(addedLength, oldSelection, newSelection)
 
-			if (onlySelectionMoved) {
+			if (!textChanged) {
 				onValueChange(
 					ParvenuEditorValue(
 						parvenuString = value.parvenuString,
@@ -32,56 +33,53 @@ public fun ParvenuEditor(
 					)
 				)
 			} else {
-				val newSpanStyles = if (oldSelection.collapsed) {
-					val cursor = oldSelection.start
+				val addStart = oldSelection.min
+				val addEnd = newSelection.max
+				val addLength = addEnd - addStart
 
-					value.parvenuString.spanStyles.mapNotNull { range ->
-						val shouldExpandSpan = shouldExpandSpanOnTextAddition(range, cursor)
+				val selMin = min(addStart, addEnd)
 
-						if (shouldExpandSpan || cursor in range) {
-							if (range.end + selectionDelta < range.start) {
-								null
-							} else if (addedLength < 0 || shouldExpandSpan) {
-								range.copy(end = range.end + addedLength)
-							} else {
-								range
-							}
-						} else if (cursor <= range.start) {
-							// if cursor == range.start, then range.startInclusive == false.
-							range.copy(
-								start = range.start + addedLength,
-								end = range.end + addedLength
-							)
-						} else if (addedLength < 0) {
-							if (range.end + addedLength < range.start) {
-								null
-							} else {
-								range.copy(
-									end = range.end + addedLength
-								)
-							}
-						} else {
-							range
-						}
-					}
+				val removedLength = if (oldSelection.collapsed) {
+					oldSelection.min - newSelection.min
 				} else {
-					value.parvenuString.spanStyles.map { range ->
-						if (oldSelection.min in range && oldSelection.max in range) {
-							range.copy(end = range.end + addedLength)
-						} else if (oldSelection.min in range) {
-							range.copy(end = oldSelection.min)
-						} else if (oldSelection.max in range) {
-							range.copy(
-								start = oldSelection.max - oldSelection.length,
-								end = range.end - oldSelection.length
-							)
-						} else if (oldSelection.min <= range.start) {
-							range.copy(
-								start = range.start + addedLength,
-								end = range.end + addedLength
-							)
+					oldSelection.length
+				}
+
+				val newSpanStyles = value.parvenuString.spanStyles.mapNotNull { range ->
+					if (range.end < selMin) {
+						range
+					} else {
+						var start = range.start
+						var end = range.end
+
+						if (removedLength > 0 && selMin < start) {
+							start -= min(removedLength, start - selMin)
+						}
+
+						if (removedLength > 0 && selMin < end) {
+							end -= min(removedLength, end - selMin)
+						}
+
+						if (addLength > 0 && addStart <= range.start) {
+							start += min(addLength, range.start - addStart)
+						}
+
+						if (addLength > 0 && addStart <= range.start) {
+							end += min(addLength, range.end - addStart)
+						}
+
+						if (addLength > 0 && shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
+							end += addLength
+						}
+
+						if (end < start) {
+							null
 						} else {
-							range
+							if (range.start == start && range.end == end) {
+								range
+							} else {
+								range.copy(start = start, end = end)
+							}
 						}
 					}
 				}
@@ -100,6 +98,35 @@ public fun ParvenuEditor(
 			}
 		}
 	)
+}
+
+internal fun hasTextChanged(
+	textLengthDelta: Int,
+	oldSelection: TextRange,
+	newSelection: TextRange
+): Boolean {
+	// (1) replaced -- texts in [oldSelection] is removed and added by newSelection.max - oldSelection.min
+	//   this case also covers batch deletion when newSelection.max - oldSelection.min == 0
+
+	// e.g.)
+	// ORIGINAL: "foo bar baz"
+	// OLD     :     ____
+	// NEW     :           |
+	// REPLACED: "foohellowbaz"
+	//  IMPLIES: ------------
+	// ADDED   :     <---->
+	// REMOVED :     <-->
+	if (-oldSelection.length + newSelection.max - oldSelection.min == textLengthDelta) {
+		return true
+	}
+
+	// (2) collapsed -- collapsed to collapsed selection with cursor moving forward
+	if (oldSelection.collapsed && newSelection.collapsed
+		&& textLengthDelta == newSelection.start - oldSelection.start) {
+		return true
+	}
+
+	return false
 }
 
 /**

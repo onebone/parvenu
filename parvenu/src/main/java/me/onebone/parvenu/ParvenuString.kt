@@ -101,12 +101,12 @@ private val NonEmptyRangePredicate: (ParvenuString.Range<*>) -> Boolean = {
 }
 
 /**
- * Removes spans in range [[start], [endExclusive]).
+ * Removes spans in range [[start], [endExclusive]) whose span meets [predicate].
  */
 internal inline fun <T> List<ParvenuString.Range<T>>.minusSpansInRange(
 	start: Int,
 	endExclusive: Int,
-	predicate: (T) -> Boolean
+	predicate: (T) -> Boolean = { true }
 ): List<ParvenuString.Range<T>> = flatMap { range ->
 	if (!predicate(range.item)) return@flatMap listOf(range)
 
