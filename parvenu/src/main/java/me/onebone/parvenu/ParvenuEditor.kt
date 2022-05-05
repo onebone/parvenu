@@ -101,9 +101,12 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 			if (range.end < selMin) {
 				range
 			} else if (selMax < range.start) {
+				val offset =
+					(if (addLength > 0) addLength else 0) - (if(removedLength > 0) removedLength else 0)
+
 				range.copy(
-					start = range.start + addLength - removedLength,
-					end = range.end + addLength - removedLength
+					start = range.start + offset,
+					end = range.end + offset
 				)
 			} else {
 				var start = range.start
