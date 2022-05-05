@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import kotlin.math.max
 import kotlin.math.min
 
 @Composable
@@ -88,6 +89,7 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 		val addLength = addEnd - addStart
 
 		val selMin = min(addStart, addEnd)
+		val selMax = max(addStart, addEnd)
 
 		val removedLength = if (oldSelection.collapsed) {
 			oldSelection.min - newSelection.min
@@ -98,6 +100,11 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 		mapNotNull { range ->
 			if (range.end < selMin) {
 				range
+			} else if (selMax <= range.start) {
+				range.copy(
+					start = range.start + addLength - removedLength,
+					end = range.end + addLength - removedLength
+				)
 			} else {
 				var start = range.start
 				var end = range.end
