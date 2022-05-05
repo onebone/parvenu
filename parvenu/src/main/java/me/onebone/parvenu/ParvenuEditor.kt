@@ -16,88 +16,29 @@ public fun ParvenuEditor(
 ) {
 	block(
 		value = value.toTextFieldValue(),
-		onValueChange = {
-			val oldSelection = value.selection
-			val newSelection = it.selection
+		onValueChange = { newValue ->
+			val textLengthDelta = newValue.text.length - value.parvenuString.text.length
+			val newSpanStyles = value.parvenuString.spanStyles.offsetSpansAccordingToSelectionChange(
+				textLengthDelta, value.selection, newValue.selection
+			)
 
-			val addedLength = it.text.length - value.parvenuString.text.length
-
-			val textChanged = hasTextChanged(addedLength, oldSelection, newSelection)
-
-			if (!textChanged) {
+			if (newSpanStyles == null) {
 				onValueChange(
-					ParvenuEditorValue(
-						parvenuString = value.parvenuString,
-						selection = it.selection,
-						composition = it.composition
+					value.copy(
+						selection = newValue.selection,
+						composition = newValue.composition
 					)
 				)
 			} else {
-				val addStart = oldSelection.min
-				val addEnd = newSelection.max
-				val addLength = addEnd - addStart
-
-				val selMin = min(addStart, addEnd)
-
-				val removedLength = if (oldSelection.collapsed) {
-					oldSelection.min - newSelection.min
-				} else {
-					oldSelection.length
-				}
-
-				val newSpanStyles = value.parvenuString.spanStyles.mapNotNull { range ->
-					if (range.end < selMin) {
-						range
-					} else {
-						var start = range.start
-						var end = range.end
-
-						if (removedLength > 0 && selMin < start) {
-							// selection is removing an empty span
-							// e.g.) "abc []|def"  (let '[]' be an empty span and '|' be a cursor)
-							//   ~~> "abc|def"
-							if (selMin == start && start == end) return@mapNotNull null
-
-							start -= min(removedLength, start - selMin)
-						}
-
-						if (removedLength > 0 && selMin < end) {
-							end -= min(removedLength, end - selMin)
-						}
-
-						if (addLength > 0 && addStart <= range.start) {
-							start += min(addLength, range.start - addStart)
-						}
-
-						if (addLength > 0 && addStart <= range.start) {
-							end += min(addLength, range.end - addStart)
-						}
-
-						if (addLength > 0 && shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
-							end += addLength
-						}
-
-						if (end < start) {
-							null
-						} else {
-							if (range.start == start && range.end == end) {
-								range
-							} else {
-								range.copy(start = start, end = end)
-							}
-						}
-					}
-				}
-
 				onValueChange(
 					ParvenuEditorValue(
 						parvenuString = ParvenuString(
-							text = it.text,
+							text = newValue.text,
 							spanStyles = newSpanStyles,
 							paragraphStyles = emptyList() // TODO
 						),
-						selection = it.selection,
-						composition = it.composition
+						selection = newValue.selection,
+						composition = newValue.composition
 					)
 				)
 			}
@@ -105,6 +46,81 @@ public fun ParvenuEditor(
 	)
 }
 
+/**
+ * Move spans according to text edits. Returns `null` if only a selection has been changed and
+ * span ranges remain unchanged.
+ */
+internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionChange(
+	textLengthDelta: Int,
+	oldSelection: TextRange,
+	newSelection: TextRange
+): List<ParvenuString.Range<T>>? {
+	val textChanged = hasTextChanged(textLengthDelta, oldSelection, newSelection)
+
+	return if (!textChanged) {
+		null
+	} else {
+		val addStart = oldSelection.min
+		val addEnd = newSelection.max
+		val addLength = addEnd - addStart
+
+		val selMin = min(addStart, addEnd)
+
+		val removedLength = if (oldSelection.collapsed) {
+			oldSelection.min - newSelection.min
+		} else {
+			oldSelection.length
+		}
+
+		mapNotNull { range ->
+			if (range.end < selMin) {
+				range
+			} else {
+				var start = range.start
+				var end = range.end
+
+				if (removedLength > 0 && selMin < start) {
+					// selection is removing an empty span
+					// e.g.) "abc []|def"  (let '[]' be an empty span and '|' be a cursor)
+					//   ~~> "abc|def"
+					if (selMin == start && start == end) return@mapNotNull null
+
+					start -= min(removedLength, start - selMin)
+				}
+
+				if (removedLength > 0 && selMin < end) {
+					end -= min(removedLength, end - selMin)
+				}
+
+				if (addLength > 0 && addStart <= range.start) {
+					start += min(addLength, range.start - addStart)
+				}
+
+				if (addLength > 0 && addStart <= range.start) {
+					end += min(addLength, range.end - addStart)
+				}
+
+				if (addLength > 0 && shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
+					end += addLength
+				}
+
+				if (end < start) {
+					null
+				} else {
+					if (range.start == start && range.end == end) {
+						range
+					} else {
+						range.copy(start = start, end = end)
+					}
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Infers if a text has changed by inspecting [textLengthDelta], [oldSelection] and [newSelection].
+ */
 internal fun hasTextChanged(
 	textLengthDelta: Int,
 	oldSelection: TextRange,
@@ -138,8 +154,8 @@ internal fun hasTextChanged(
  * Returns `true` if the [range] should expand if a text is added at the [cursor].
  *
  * The behavior is slightly different from that of [ParvenuString.Range.contains], for
- * example, range=[3, 3), cursor=3 returns true because a cursor should expand the span even if
- * the range is empty as it is startInclusive.
+ * example, range=[3, 3), cursor=3, the range is empty but the given input returns true
+ * because as it is startInclusive therefore a span should expand on text addition.
  */
 internal fun shouldExpandSpanOnTextAddition(
 	range: ParvenuString.Range<*>,
