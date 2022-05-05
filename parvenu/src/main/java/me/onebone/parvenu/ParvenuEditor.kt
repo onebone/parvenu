@@ -1,6 +1,7 @@
 package me.onebone.parvenu
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlin.math.min
@@ -14,8 +15,10 @@ public fun ParvenuEditor(
 		onValueChange: (TextFieldValue) -> Unit
 	) -> Unit
 ) {
+	val textFieldValue = remember(value) { value.toTextFieldValue() }
+
 	block(
-		value = value.toTextFieldValue(),
+		value = textFieldValue,
 		onValueChange = { newValue ->
 			val textLengthDelta = newValue.text.length - value.parvenuString.text.length
 			val newSpanStyles = value.parvenuString.spanStyles.offsetSpansAccordingToSelectionChange(
