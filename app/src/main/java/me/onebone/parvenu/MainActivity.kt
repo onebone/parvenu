@@ -15,11 +15,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -31,12 +33,20 @@ class MainActivity : ComponentActivity() {
 			var editorValue by remember { mutableStateOf(
 				ParvenuEditorValue(
 					parvenuString = ParvenuString(
-						text = "normal bold",
+						text = "normal bold both",
 						spanStyles = listOf(
 							ParvenuString.Range(
 								item = SpanStyle(fontWeight = FontWeight.Bold),
 								start = 7, end = 11,
 								startInclusive = false,
+								endInclusive = true
+							)
+						),
+						paragraphStyles = listOf(
+							ParvenuString.Range(
+								item = ParagraphStyle(textIndent = TextIndent(8.sp, 8.sp)),
+								start = 12, end = 16,
+								startInclusive = true,
 								endInclusive = true
 							)
 						)

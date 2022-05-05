@@ -25,7 +25,11 @@ public fun ParvenuEditor(
 				textLengthDelta, value.selection, newValue.selection
 			)
 
-			if (newSpanStyles == null) {
+			val newParagraphStyles = value.parvenuString.paragraphStyles.offsetSpansAccordingToSelectionChange(
+				textLengthDelta, value.selection, newValue.selection
+			)
+
+			if (newSpanStyles == null && newParagraphStyles == null) {
 				onValueChange(
 					value.copy(
 						selection = newValue.selection,
@@ -37,8 +41,8 @@ public fun ParvenuEditor(
 					ParvenuEditorValue(
 						parvenuString = ParvenuString(
 							text = newValue.text,
-							spanStyles = newSpanStyles,
-							paragraphStyles = emptyList() // TODO
+							spanStyles = newSpanStyles ?: value.parvenuString.spanStyles,
+							paragraphStyles = newParagraphStyles ?: value.parvenuString.paragraphStyles
 						),
 						selection = newValue.selection,
 						composition = newValue.composition
@@ -99,12 +103,10 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 					start += min(addLength, range.start - addStart)
 				}
 
-				if (addLength > 0 && addStart <= range.start) {
-					end += min(addLength, range.end - addStart)
-				}
-
 				if (addLength > 0 && shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
 					end += addLength
+				} else if (addLength > 0 && addStart <= range.end) {
+					end += min(addLength, range.end - addStart)
 				}
 
 				if (end < start) {
