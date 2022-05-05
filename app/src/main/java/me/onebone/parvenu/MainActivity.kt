@@ -47,25 +47,51 @@ class MainActivity : ComponentActivity() {
 			) }
 
 			Column(modifier = Modifier.fillMaxSize()) {
-				ParvenuSpanToggle(
-					value = editorValue,
-					onValueChange = {
-						editorValue = it
-					},
-					spanFactory = { SpanStyle(fontStyle = FontStyle.Italic) },
-					spanEqualPredicate = { style ->
-						style.fontStyle == FontStyle.Italic
+				Row(
+					modifier = Modifier.fillMaxWidth().padding(8.dp),
+					horizontalArrangement = Arrangement.spacedBy(8.dp)
+				) {
+					ParvenuSpanToggle(
+						value = editorValue,
+						onValueChange = {
+							editorValue = it
+						},
+						spanFactory = { SpanStyle(fontStyle = FontStyle.Italic) },
+						spanEqualPredicate = { style ->
+							style.fontStyle == FontStyle.Italic
+						}
+					) { enabled, onToggle ->
+						Text(
+							modifier = Modifier
+								.clickable { onToggle() }
+								.alpha(if (enabled) 1f else 0.3f)
+								.background(Color.Gray)
+								.padding(8.dp),
+							text = "italic"
+						)
 					}
-				) { enabled, onToggle ->
-					Text(
-						modifier = Modifier
-							.clickable { onToggle() }
-							.alpha(if (enabled) 1f else 0.3f)
-							.background(Color.Gray)
-							.padding(8.dp),
-						text = "italic"
-					)
+
+					ParvenuSpanToggle(
+						value = editorValue,
+						onValueChange = {
+							editorValue = it
+						},
+						spanFactory = { SpanStyle(fontWeight = FontWeight.Bold) },
+						spanEqualPredicate = { style ->
+							style.fontWeight == FontWeight.Bold
+						}
+					) { enabled, onToggle ->
+						Text(
+							modifier = Modifier
+								.clickable { onToggle() }
+								.alpha(if (enabled) 1f else 0.3f)
+								.background(Color.Gray)
+								.padding(8.dp),
+							text = "bold"
+						)
+					}
 				}
+
 
 				ParvenuEditor(
 					value = editorValue,
