@@ -53,6 +53,11 @@ public fun ParvenuEditor(
 						var end = range.end
 
 						if (removedLength > 0 && selMin < start) {
+							// selection is removing an empty span
+							// e.g.) "abc []|def"  (let '[]' be an empty span and '|' be a cursor)
+							//   ~~> "abc|def"
+							if (selMin == start && start == end) return@mapNotNull null
+
 							start -= min(removedLength, start - selMin)
 						}
 
