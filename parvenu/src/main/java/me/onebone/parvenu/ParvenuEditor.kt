@@ -23,11 +23,21 @@ public fun ParvenuEditor(
 			val textLengthDelta = newValue.text.length - value.parvenuString.text.length
 			val newSpanStyles = value.parvenuString.spanStyles.offsetSpansAccordingToSelectionChange(
 				textLengthDelta, value.selection, newValue.selection
-			)
+			) { start, end ->
+				// selection is removing an empty span
+				// e.g.) "abc []|def"  (let '[]' be an empty span and '|' be a cursor)
+				//   ~~> "abc|def"
+				start == end
+			}
 
 			val newParagraphStyles = value.parvenuString.paragraphStyles.offsetSpansAccordingToSelectionChange(
 				textLengthDelta, value.selection, newValue.selection
-			)
+			) { _, _ ->
+				// whole paragraph span should be removed if the start of the span is deleted
+				// e.g.) "abc[|paragraph]"  (let '[...]' be a paragraph span and '|' be a cursor)
+				//   ~~> "abcparagraph"
+				true
+			}
 
 			if (newSpanStyles == null && newParagraphStyles == null) {
 				onValueChange(
@@ -56,11 +66,17 @@ public fun ParvenuEditor(
 /**
  * Move spans according to text edits. Returns `null` if only a selection has been changed and
  * span ranges remain unchanged.
+ *
+ * @param onDeleteStart If deleting a start of the span, the whole span is removed if the lambda
+ *  returns `true`. This is needed to switch a strategy between span styles and paragraph styles.
+ *  A span styles should be removed only if the range is empty, while a paragraph style should be
+ *  removed immediately when the start of the span is deleted.
  */
 internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionChange(
 	textLengthDelta: Int,
 	oldSelection: TextRange,
-	newSelection: TextRange
+	newSelection: TextRange,
+	onDeleteStart: (start: Int, end: Int) -> Boolean
 ): List<ParvenuString.Range<T>>? {
 	val textChanged = hasTextChanged(textLengthDelta, oldSelection, newSelection)
 
@@ -87,10 +103,7 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 				var end = range.end
 
 				if (removedLength > 0 && selMin < start) {
-					// selection is removing an empty span
-					// e.g.) "abc []|def"  (let '[]' be an empty span and '|' be a cursor)
-					//   ~~> "abc|def"
-					if (selMin == start && start == end) return@mapNotNull null
+					if (onDeleteStart(start, end)) return@mapNotNull null
 
 					start -= min(removedLength, start - selMin)
 				}
