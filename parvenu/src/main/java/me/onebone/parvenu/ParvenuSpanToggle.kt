@@ -44,14 +44,12 @@ public fun ParvenuSpanToggle(
 				))
 			} else {
 				onValueChange(value.copy(
-					parvenuString = ParvenuString(
-						text = value.parvenuString.text,
+					parvenuString = value.parvenuString.copy(
 						spanStyles = value.parvenuString.spanStyles.minusSpansInRange(
 							start = selection.min,
 							endExclusive = selection.max,
 							predicate = spanEqualPredicate
-						),
-						paragraphStyles = emptyList()
+						)
 					)
 				))
 			}
