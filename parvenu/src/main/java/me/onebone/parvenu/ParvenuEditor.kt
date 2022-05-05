@@ -100,7 +100,7 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 		mapNotNull { range ->
 			if (range.end < selMin) {
 				range
-			} else if (selMax <= range.start) {
+			} else if (selMax < range.start) {
 				range.copy(
 					start = range.start + addLength - removedLength,
 					end = range.end + addLength - removedLength
