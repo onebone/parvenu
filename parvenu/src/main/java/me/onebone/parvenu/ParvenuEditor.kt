@@ -144,6 +144,9 @@ internal fun hasTextChanged(
 	oldSelection: TextRange,
 	newSelection: TextRange
 ): Boolean {
+	// (0) new selection is expanded -- it is not possible to edit a text when the new selection is expanded
+	if (!newSelection.collapsed) return false
+
 	// (1) replaced -- texts in [oldSelection] is removed and added by newSelection.max - oldSelection.min
 	//   this case also covers batch deletion when newSelection.max - oldSelection.min == 0
 
