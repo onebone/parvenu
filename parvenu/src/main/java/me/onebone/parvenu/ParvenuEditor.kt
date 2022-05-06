@@ -21,24 +21,20 @@ public fun ParvenuEditor(
 	block(
 		value = textFieldValue,
 		onValueChange = { newValue ->
-			val textLengthDelta = newValue.text.length - value.parvenuString.text.length
-			val newSpanStyles = value.parvenuString.spanStyles.offsetSpansAccordingToSelectionChange(
-				textLengthDelta, value.selection, newValue.selection
-			) { start, end ->
-				// selection is removing an empty span
-				// e.g.) "abc []|def"  (let '[]' be an empty span and '|' be a cursor)
-				//   ~~> "abc|def"
-				start == end
+			val textChanged: (Int, Int) -> Boolean = { start, end ->
+				value.parvenuString.text.equalsInRange(newValue.text, start, end)
 			}
 
+			val textLengthDelta = newValue.text.length - value.parvenuString.text.length
+			val newSpanStyles = value.parvenuString.spanStyles.offsetSpansAccordingToSelectionChange(
+				textLengthDelta, textChanged,
+				value.selection, newValue.selection, SpanOnDeleteStart
+			)
+
 			val newParagraphStyles = value.parvenuString.paragraphStyles.offsetSpansAccordingToSelectionChange(
-				textLengthDelta, value.selection, newValue.selection
-			) { _, _ ->
-				// whole paragraph span should be removed if the start of the span is deleted
-				// e.g.) "abc[|paragraph]"  (let '[...]' be a paragraph span and '|' be a cursor)
-				//   ~~> "abcparagraph"
-				true
-			}
+				textLengthDelta, textChanged,
+				value.selection, newValue.selection, ParagraphOnDeleteStart
+			)
 
 			if (newSpanStyles == null && newParagraphStyles == null) {
 				onValueChange(
@@ -64,10 +60,37 @@ public fun ParvenuEditor(
 	)
 }
 
+private fun String.equalsInRange(other: String, start: Int, end: Int): Boolean {
+	for (i in start until end) {
+		if (this[i] != other[i]) return false
+	}
+
+	return true
+}
+
+internal val SpanOnDeleteStart: (start: Int, end: Int) -> Boolean = { start, end ->
+	// selection is removing an empty span
+	// e.g.) "abc []|def"  (let '[]' be an empty span and '|' be a cursor)
+	//   ~~> "abc|def"
+	start == end
+}
+
+internal val ParagraphOnDeleteStart: (start: Int, end: Int) -> Boolean = { _, _ ->
+	// whole paragraph span should be removed if the start of the span is deleted
+	// e.g.) "abc[|paragraph]"  (let '[...]' be a paragraph span and '|' be a cursor)
+	//   ~~> "abcparagraph"
+	true
+}
+
 /**
  * Move spans according to text edits. Returns `null` if only a selection has been changed and
  * span ranges remain unchanged.
  *
+ * @param textChanged There is a conflict between pasting and selection change where
+ *  oldSelection.max == newSelection.min. To mitigate this issue, we infer if only selection has
+ *  changed or text has changed by comparing the string values. Although this method has a limitation
+ *  where it cannot distinguish if pasted text is the same as the original one, it is not a common
+ *  case?
  * @param onDeleteStart If deleting a start of the span, the whole span is removed if the lambda
  *  returns `true`. This is needed to switch a strategy between span styles and paragraph styles.
  *  A span styles should be removed only if the range is empty, while a paragraph style should be
@@ -75,13 +98,14 @@ public fun ParvenuEditor(
  */
 internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionChange(
 	textLengthDelta: Int,
+	textChanged: (start: Int, end: Int) -> Boolean,
 	oldSelection: TextRange,
 	newSelection: TextRange,
 	onDeleteStart: (start: Int, end: Int) -> Boolean
 ): List<ParvenuString.Range<T>>? {
-	val textChanged = hasTextChanged(textLengthDelta, oldSelection, newSelection)
+	val hasTextChanged = hasTextChanged(textLengthDelta, textChanged, oldSelection, newSelection)
 
-	return if (!textChanged) {
+	return if (!hasTextChanged) {
 		null
 	} else {
 		val addStart = oldSelection.min
@@ -151,14 +175,18 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
  */
 internal fun hasTextChanged(
 	textLengthDelta: Int,
+	textChanged: (start: Int, end: Int) -> Boolean,
 	oldSelection: TextRange,
 	newSelection: TextRange
 ): Boolean {
 	// (0) new selection is expanded -- there is no possible case where text is modified if the new selection is expanded
 	if (!newSelection.collapsed) return false
 
-	// (1) replaced -- texts in [oldSelection] is removed and added by newSelection.max - oldSelection.min
-	//   this case also covers batch deletion when newSelection.max - oldSelection.min == 0
+	// (1) text changed -- text length is not the same
+	if (textLengthDelta != 0) return true
+
+	// (2) replaced -- texts in [oldSelection] is removed and added by newSelection.max - oldSelection.min
+	//   this case also covers batch deletion when newSelection.max - oldSelection.min == 0.
 
 	// e.g.)
 	// ORIGINAL: "foo bar baz"
@@ -168,11 +196,12 @@ internal fun hasTextChanged(
 	//  IMPLIES: ------------
 	// ADDED   :     <---->
 	// REMOVED :     <-->
-	if (-oldSelection.length + newSelection.max - oldSelection.min == textLengthDelta) {
+	if (-oldSelection.length + newSelection.max - oldSelection.min == textLengthDelta
+		&& textChanged(oldSelection.min, newSelection.max)) {
 		return true
 	}
 
-	// (2) collapsed -- collapsed to collapsed selection with cursor moving forward
+	// (3) collapsed -- collapsed to collapsed selection with cursor moving forward
 	if (oldSelection.collapsed && newSelection.collapsed
 		&& textLengthDelta == newSelection.start - oldSelection.start) {
 		return true
