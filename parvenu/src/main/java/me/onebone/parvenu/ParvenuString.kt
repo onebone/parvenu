@@ -136,3 +136,17 @@ internal inline fun <T> List<ParvenuString.Range<T>>.minusSpansInRange(
 		listOf(range)
 	}
 }
+
+internal inline fun <T> List<ParvenuString.Range<T>>.removeIntersectingWithRange(
+	start: Int,
+	end: Int,
+	predicate: (T) -> Boolean
+): List<ParvenuString.Range<T>> = mapNotNull { range ->
+	if (!predicate(range.item)) return@mapNotNull null
+
+	if (range.contains(start) || range.contains(end)) {
+		null
+	} else {
+		range
+	}
+}

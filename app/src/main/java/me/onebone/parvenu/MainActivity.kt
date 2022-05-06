@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
 						),
 						paragraphStyles = listOf(
 							ParvenuString.Range(
-								item = ParagraphStyle(textIndent = TextIndent(8.sp, 8.sp)),
+								item = ParagraphStyle(textIndent = TextIndent(16.sp, 16.sp)),
 								start = 12, end = 16,
 								startInclusive = true,
 								endInclusive = true
@@ -58,7 +58,9 @@ class MainActivity : ComponentActivity() {
 
 			Column(modifier = Modifier.fillMaxSize()) {
 				Row(
-					modifier = Modifier.fillMaxWidth().padding(8.dp),
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(8.dp),
 					horizontalArrangement = Arrangement.spacedBy(8.dp)
 				) {
 					ParvenuSpanToggle(
@@ -98,6 +100,26 @@ class MainActivity : ComponentActivity() {
 								.background(Color.Gray)
 								.padding(8.dp),
 							text = "bold"
+						)
+					}
+
+					ParvenuParagraphToggle(
+						value = editorValue,
+						onValueChange = {
+							editorValue = it
+						},
+						paragraphFactory = { ParagraphStyle(textIndent = TextIndent(16.sp, 16.sp)) },
+						paragraphEqualPredicate = { style ->
+							style.textIndent?.firstLine == 16.sp
+						}
+					) { enabled, onToggle ->
+						Text(
+							modifier = Modifier
+								.clickable { onToggle() }
+								.alpha(if (enabled) 1f else 0.3f)
+								.background(Color.Gray)
+								.padding(8.dp),
+							text = "indent"
 						)
 					}
 				}
