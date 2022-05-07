@@ -148,15 +148,18 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 					end -= min(removedLength, end - selMin)
 				}
 
-				if (addLength > 0 && (addStart < range.start || (addStart == range.start && !range.startInclusive))) {
-					start += addLength
-				}
-
 				if (addLength > 0) {
+					val shouldExpandOnInsertion = shouldExpandSpanOnTextAddition(range, oldSelection.min)
+
+					// the case where selMax < range.start is already filtered above
+					if (addEnd <= range.start || !shouldExpandOnInsertion) {
+						start += addLength
+					}
+
 					// The end offset should shift to the right if
 					// (1) cursor is in front the span's end offset or,
 					// (2) length of the span itself should expand.
-					if (addStart < range.end || shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
+					if (addStart < range.end || shouldExpandOnInsertion) {
 						end += addLength
 					}
 				}
@@ -223,16 +226,16 @@ internal fun hasTextChanged(
  * Returns `true` if the [range] should increase its length if a text is added at the [cursor].
  *
  * For example, consider the case where range = (3, 5].
- * * 1) If cursor was at 3 and inserted text, then the span should not increase its length, but
+ * 1) If cursor was at 3 and inserted text, then the span should not increase its length, but
  *   only shift to the right because it is NOT start inclusive.
- * * 2) If cursor was at 4 and inserted text, then the span should increase its length, because
+ * 2) If cursor was at 4 and inserted text, then the span should increase its length, because
  *   the text was inserted in the middle of the span.
- * * 3) If cursor was at 5 and inserted text, then the span should increase its length, because
+ * 3) If cursor was at 5 and inserted text, then the span should increase its length, because
  *   the span is end inclusive.
  *
  * The behavior is slightly different from that of [ParvenuString.Range.contains], for
  * example, range=[3, 3), cursor=3, the range is empty but the given input returns true
- * because as it is startInclusive therefore a span should expand on text addition.
+ * because as it is startInclusive therefore a span should expand on text insertion.
  */
 internal fun shouldExpandSpanOnTextAddition(
 	range: ParvenuString.Range<*>,

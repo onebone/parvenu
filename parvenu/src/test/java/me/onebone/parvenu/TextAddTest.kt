@@ -12,6 +12,7 @@ public class TextAddTest {
 			exclusiveInclusive(3, 6),
 			exclusiveInclusive(1, 3),
 			exclusiveInclusive(5, 6),
+			exclusiveInclusive(5, 5),
 			exclusiveInclusive(8, 10),
 			exclusiveInclusive(4, 5)
 		)
@@ -23,6 +24,7 @@ public class TextAddTest {
 			exclusiveInclusive(3, 7),
 			exclusiveInclusive(1, 3),
 			exclusiveInclusive(6, 7),
+			exclusiveInclusive(5, 6),
 			exclusiveInclusive(9, 11),
 			exclusiveInclusive(4, 6)
 		)
