@@ -22,7 +22,9 @@ public fun ParvenuEditor(
 		value = textFieldValue,
 		onValueChange = { newValue ->
 			val textChanged: (Int, Int) -> Boolean = { start, end ->
-				value.parvenuString.text.equalsInRange(newValue.text, start, end)
+				assert(value.parvenuString.text.length == newValue.text.length)
+
+				!value.parvenuString.text.equalsInRange(newValue.text, start, end)
 			}
 
 			val textLengthDelta = newValue.text.length - value.parvenuString.text.length
@@ -126,7 +128,7 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 				range
 			} else if (selMax < range.start) {
 				val offset =
-					(if (addLength > 0) addLength else 0) - (if(removedLength > 0) removedLength else 0)
+					(if (addLength > 0) addLength else 0) - (if (removedLength > 0) removedLength else 0)
 
 				range.copy(
 					start = range.start + offset,
@@ -143,10 +145,10 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 				}
 
 				if (removedLength > 0 && selMin < end) {
-					end -= min(removedLength, end - selMin)
+					end -= min(end - selMin, removedLength)
 				}
 
-				if (addLength > 0 && addStart < range.start || (addStart == range.start && !range.startInclusive)) {
+				if (addLength > 0 && (addStart < range.start || (addStart == range.start && !range.startInclusive))) {
 					start += addLength
 				}
 

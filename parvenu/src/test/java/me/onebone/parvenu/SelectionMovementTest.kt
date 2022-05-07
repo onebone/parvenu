@@ -1,8 +1,6 @@
 package me.onebone.parvenu
 
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
-import me.onebone.parvenu.util.exclusiveInclusive
 import me.onebone.parvenu.util.inclusiveExclusive
 import org.junit.Assert.assertNull
 import org.junit.Test

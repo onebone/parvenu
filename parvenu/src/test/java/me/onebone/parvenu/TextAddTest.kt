@@ -7,7 +7,7 @@ import org.junit.Test
 
 public class TextAddTest {
 	@Test
-	public fun addOneCharacter() {
+	public fun spanAddOneCharacter() {
 		val oldSpanStyles = listOf(
 			exclusiveInclusive(3, 6),
 			exclusiveInclusive(1, 3),
@@ -39,7 +39,7 @@ public class TextAddTest {
 	}
 
 	@Test
-	public fun addString() {
+	public fun spanAddString() {
 		val oldSpanStyles = listOf(
 			exclusiveInclusive(3, 6),
 			exclusiveInclusive(1, 5),
