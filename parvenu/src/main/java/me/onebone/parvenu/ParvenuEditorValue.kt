@@ -9,9 +9,15 @@ import androidx.compose.ui.text.input.TextFieldValue
 @Immutable
 public class ParvenuEditorValue(
 	public val parvenuString: ParvenuString,
-	public val selection: TextRange,
-	public val composition: TextRange?
+	public val selection: TextRange = TextRange.Zero,
+	public val composition: TextRange? = null
 ) {
+	public constructor(
+		text: String = "",
+		selection: TextRange = TextRange.Zero,
+		composition: TextRange? = null
+	) : this(ParvenuString(text), selection, composition)
+
 	public fun copy(
 		parvenuString: ParvenuString = this.parvenuString,
 		selection: TextRange = this.selection,
