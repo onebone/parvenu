@@ -68,10 +68,10 @@ public class TextDeleteTest {
 			exclusiveInclusive(4, 5),
 			exclusiveInclusive(4, 7),
 			exclusiveInclusive(6, 8),
-			exclusiveInclusive(4, 4), // was 5, 7 -> should be removed?
+			// removed -> 5, 7
 			exclusiveInclusive(4, 4),
 			exclusiveInclusive(2, 4),
-			exclusiveInclusive(4, 4), // was 5, 6 -> should be removed?
+			// removed -> 5, 6
 			exclusiveInclusive(1, 4),
 			exclusiveInclusive(0, 2),
 			exclusiveInclusive(3, 4),

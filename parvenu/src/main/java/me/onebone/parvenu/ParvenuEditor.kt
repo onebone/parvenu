@@ -145,7 +145,7 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 				}
 
 				if (removedLength > 0 && selMin < end) {
-					end -= min(end - selMin, removedLength)
+					end -= min(removedLength, end - selMin)
 				}
 
 				if (addLength > 0 && (addStart < range.start || (addStart == range.start && !range.startInclusive))) {
@@ -166,6 +166,10 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 				} else {
 					if (range.start == start && range.end == end) {
 						range
+					} else if (start < range.start && range.end - range.start > 0 && start == end) {
+						// ORIGINAL: "ab{c[def]}g" --> [] = span, {} = cursor selection
+						// NEW     : "abg"
+						null
 					} else {
 						range.copy(start = start, end = end)
 					}
