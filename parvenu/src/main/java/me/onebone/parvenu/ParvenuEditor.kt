@@ -184,7 +184,7 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 						// if the span is deleted, then make it end inclusive
 						// ORIGINAL: "abc(def)|ghi" --> () = exclusive/exclusive span
 						// NEW     : "abc(de]|ghi"     --> (] = exclusive/inclusive span
-						val endInclusive = removedLength > 0 && oldSelection.max == range.end
+						val endInclusive = removedLength > 0 && oldSelection.max == range.end && selMin > range.start
 
 						range.copy(start = start, end = start + spanLength, endInclusive = range.endInclusive || endInclusive)
 					}

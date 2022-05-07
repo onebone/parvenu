@@ -96,7 +96,7 @@ public class TextDeleteTest {
 		val oldSpanStyles = listOf(
 			exclusiveExclusive(4, 8),
 			exclusiveExclusive(4, 5),
-			exclusiveExclusive(3, 5)
+			exclusiveExclusive(3, 5),
 		)
 
 		val oldSelection = TextRange(5)
@@ -104,7 +104,7 @@ public class TextDeleteTest {
 
 		val expectedSpanStyles = listOf(
 			exclusiveExclusive(4, 7),
-			exclusiveInclusive(4, 4),
+			exclusiveExclusive(4, 4),
 			exclusiveInclusive(3, 4)
 		)
 
