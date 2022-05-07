@@ -33,7 +33,7 @@ public class TextDeleteTest {
 
 		val actualSpanStyles = oldSpanStyles.offsetSpansAccordingToSelectionChange(
 			textLengthDelta = -1,
-			textChanged = TestTextChanged,
+			textChangedInRange = TestTextChanged,
 			oldSelection = oldSelection,
 			newSelection = newSelection,
 			onDeleteStart = SpanOnDeleteStart
@@ -81,7 +81,7 @@ public class TextDeleteTest {
 
 		val actualSpanStyles = oldSpanStyles.offsetSpansAccordingToSelectionChange(
 			textLengthDelta = -3,
-			textChanged = TestTextChanged,
+			textChangedInRange = TestTextChanged,
 			oldSelection = oldSelection,
 			newSelection = newSelection,
 			onDeleteStart = SpanOnDeleteStart

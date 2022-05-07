@@ -21,20 +21,22 @@ public fun ParvenuEditor(
 	block(
 		value = textFieldValue,
 		onValueChange = { newValue ->
-			val textChanged: (Int, Int) -> Boolean = { start, end ->
-				assert(value.parvenuString.text.length == newValue.text.length)
+			val textChangedInRange: (Int, Int) -> Boolean = { start, end ->
+				assert(value.parvenuString.text.length == newValue.text.length) {
+					"the lambda should be called only if old and new length is the same"
+				}
 
 				!value.parvenuString.text.equalsInRange(newValue.text, start, end)
 			}
 
 			val textLengthDelta = newValue.text.length - value.parvenuString.text.length
 			val newSpanStyles = value.parvenuString.spanStyles.offsetSpansAccordingToSelectionChange(
-				textLengthDelta, textChanged,
+				textLengthDelta, textChangedInRange,
 				value.selection, newValue.selection, SpanOnDeleteStart
 			)
 
 			val newParagraphStyles = value.parvenuString.paragraphStyles.offsetSpansAccordingToSelectionChange(
-				textLengthDelta, textChanged,
+				textLengthDelta, textChangedInRange,
 				value.selection, newValue.selection, ParagraphOnDeleteStart
 			)
 
@@ -88,7 +90,7 @@ internal val ParagraphOnDeleteStart: (start: Int, end: Int) -> Boolean = { _, _ 
  * Move spans according to text edits. Returns `null` if only a selection has been changed and
  * span ranges remain unchanged.
  *
- * @param textChanged There is a conflict between pasting and selection change where
+ * @param textChangedInRange There is a conflict between pasting and selection change where
  *  oldSelection.max == newSelection.min. To mitigate this issue, we infer if only selection has
  *  changed or text has changed by comparing the string values. Although this method has a limitation
  *  where it cannot distinguish if pasted text is the same as the original one, it is not a common
@@ -100,12 +102,12 @@ internal val ParagraphOnDeleteStart: (start: Int, end: Int) -> Boolean = { _, _ 
  */
 internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionChange(
 	textLengthDelta: Int,
-	textChanged: (start: Int, end: Int) -> Boolean,
+	textChangedInRange: (start: Int, end: Int) -> Boolean,
 	oldSelection: TextRange,
 	newSelection: TextRange,
 	onDeleteStart: (start: Int, end: Int) -> Boolean
 ): List<ParvenuString.Range<T>>? {
-	val hasTextChanged = hasTextChanged(textLengthDelta, textChanged, oldSelection, newSelection)
+	val hasTextChanged = hasTextChanged(textLengthDelta, textChangedInRange, oldSelection, newSelection)
 
 	return if (!hasTextChanged) {
 		null
@@ -187,7 +189,7 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
  */
 internal fun hasTextChanged(
 	textLengthDelta: Int,
-	textChanged: (start: Int, end: Int) -> Boolean,
+	textChangedInRange: (start: Int, end: Int) -> Boolean,
 	oldSelection: TextRange,
 	newSelection: TextRange
 ): Boolean {
@@ -209,7 +211,7 @@ internal fun hasTextChanged(
 	// ADDED   :     <---->
 	// REMOVED :     <-->
 	if (-oldSelection.length + newSelection.max - oldSelection.min == textLengthDelta
-		&& textChanged(oldSelection.min, newSelection.max)) {
+		&& textChangedInRange(oldSelection.min, newSelection.max)) {
 		return true
 	}
 
