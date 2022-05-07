@@ -1,6 +1,7 @@
 package me.onebone.parvenu
 
 import androidx.compose.ui.text.TextRange
+import me.onebone.parvenu.util.exclusiveExclusive
 import me.onebone.parvenu.util.exclusiveInclusive
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -14,7 +15,9 @@ public class TextAddTest {
 			exclusiveInclusive(5, 6),
 			exclusiveInclusive(5, 5),
 			exclusiveInclusive(8, 10),
-			exclusiveInclusive(4, 5)
+			exclusiveInclusive(4, 5),
+			exclusiveExclusive(4, 5),
+			exclusiveExclusive(5, 5)
 		)
 
 		val oldSelection = TextRange(5)
@@ -26,7 +29,9 @@ public class TextAddTest {
 			exclusiveInclusive(6, 7),
 			exclusiveInclusive(5, 6),
 			exclusiveInclusive(9, 11),
-			exclusiveInclusive(4, 6)
+			exclusiveInclusive(4, 6),
+			exclusiveExclusive(4, 5),
+			exclusiveExclusive(6, 6) // <- 5, 5 is allowed
 		)
 
 		val actualSpanStyles = oldSpanStyles.offsetSpansAccordingToSelectionChange(

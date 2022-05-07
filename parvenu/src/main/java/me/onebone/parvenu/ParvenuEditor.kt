@@ -161,9 +161,13 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 				if (addLength > 0) {
 					if (shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
 						spanLength += addLength
-					}
-
-					if (addStart < range.start || !shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
+					} else if (
+						// We should shift the end off set to the right if:
+						// 1) a text is being added in front of the span or
+						// 2) if text is being inserted at the start of the span, then we should consider if it is start inclusive
+						addStart < range.start
+						|| (addStart == range.start && !range.startInclusive)
+					) {
 						start += addLength
 					}
 				}
