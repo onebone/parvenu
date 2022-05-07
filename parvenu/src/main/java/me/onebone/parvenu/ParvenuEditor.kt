@@ -243,12 +243,6 @@ internal fun hasTextChanged(
 		return true
 	}
 
-	// (3) collapsed -- collapsed to collapsed selection with cursor moving forward
-	if (oldSelection.collapsed && newSelection.collapsed
-		&& textLengthDelta == newSelection.start - oldSelection.start) {
-		return true
-	}
-
 	return false
 }
 
