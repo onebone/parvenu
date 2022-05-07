@@ -2,6 +2,8 @@ package me.onebone.parvenu
 
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
+import me.onebone.parvenu.util.exclusiveInclusive
+import me.onebone.parvenu.util.inclusiveExclusive
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -12,10 +14,10 @@ public class SelectionMovementTest {
 	@Test
 	public fun oneSelectionForward() {
 		val oldSpanStyles = listOf(
-			ParvenuString.Range(TestSpanStyle, 3, 6, startInclusive = true, endInclusive = false),
-			ParvenuString.Range(TestSpanStyle, 5, 8, startInclusive = true, endInclusive = false),
-			ParvenuString.Range(TestSpanStyle, 1, 4, startInclusive = true, endInclusive = false),
-			ParvenuString.Range(TestSpanStyle, 5, 6, startInclusive = true, endInclusive = false)
+			inclusiveExclusive(3, 6),
+			inclusiveExclusive(5, 8),
+			inclusiveExclusive(1, 4),
+			inclusiveExclusive(5, 6)
 		)
 
 		val textLengthDelta = 0
@@ -33,10 +35,10 @@ public class SelectionMovementTest {
 	@Test
 	public fun oneSelectionBehind() {
 		val oldSpanStyles = listOf(
-			ParvenuString.Range(TestSpanStyle, 3, 6, startInclusive = true, endInclusive = false),
-			ParvenuString.Range(TestSpanStyle, 5, 8, startInclusive = true, endInclusive = false),
-			ParvenuString.Range(TestSpanStyle, 1, 4, startInclusive = true, endInclusive = false),
-			ParvenuString.Range(TestSpanStyle, 4, 5, startInclusive = true, endInclusive = false)
+			inclusiveExclusive(3, 6),
+			inclusiveExclusive(5, 8),
+			inclusiveExclusive(1, 4),
+			inclusiveExclusive(4, 5)
 		)
 
 		val textLengthDelta = 0
@@ -54,10 +56,10 @@ public class SelectionMovementTest {
 	@Test
 	public fun transitionExpandToCollapsed() {
 		val oldSpanStyles = listOf(
-			ParvenuString.Range(TestSpanStyle, 3, 6, startInclusive = true, endInclusive = false),
-			ParvenuString.Range(TestSpanStyle, 5, 8, startInclusive = true, endInclusive = false),
-			ParvenuString.Range(TestSpanStyle, 1, 4, startInclusive = true, endInclusive = false),
-			ParvenuString.Range(TestSpanStyle, 4, 5, startInclusive = true, endInclusive = false)
+			inclusiveExclusive(3, 6),
+			inclusiveExclusive(5, 8),
+			inclusiveExclusive(1, 4),
+			inclusiveExclusive(4, 5)
 		)
 
 		val textLengthDelta = 0
@@ -73,7 +75,6 @@ public class SelectionMovementTest {
 	}
 
 	private companion object {
-		val TestSpanStyle = SpanStyle()
 		val TextChangedLambda: (Int, Int) -> Boolean = { _, _ -> false }
 	}
 }

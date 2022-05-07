@@ -1,6 +1,7 @@
 package me.onebone.parvenu
 
 import androidx.compose.ui.text.TextRange
+import me.onebone.parvenu.util.exclusiveInclusive
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -8,22 +9,22 @@ public class TextAddTest {
 	@Test
 	public fun addOneCharacter() {
 		val oldSpanStyles = listOf(
-			ParvenuString.Range(TestItem, 3, 6, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 1, 3, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 5, 6, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 8, 10, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 4, 5, startInclusive = false, endInclusive = true)
+			exclusiveInclusive(3, 6),
+			exclusiveInclusive(1, 3),
+			exclusiveInclusive(5, 6),
+			exclusiveInclusive(8, 10),
+			exclusiveInclusive(4, 5)
 		)
 
 		val oldSelection = TextRange(5)
 		val newSelection = TextRange(6)
 
 		val expectedSpanStyles = listOf(
-			ParvenuString.Range(TestItem, 3, 7, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 1, 3, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 6, 7, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 9, 11, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 4, 6, startInclusive = false, endInclusive = true)
+			exclusiveInclusive(3, 7),
+			exclusiveInclusive(1, 3),
+			exclusiveInclusive(6, 7),
+			exclusiveInclusive(9, 11),
+			exclusiveInclusive(4, 6)
 		)
 
 		val actualSpanStyles = oldSpanStyles.offsetSpansAccordingToSelectionChange(
@@ -40,26 +41,26 @@ public class TextAddTest {
 	@Test
 	public fun addString() {
 		val oldSpanStyles = listOf(
-			ParvenuString.Range(TestItem, 3, 6, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 1, 5, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 5, 9, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 7, 9, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 9, 11, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 8, 12, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 2, 15, startInclusive = false, endInclusive = true)
+			exclusiveInclusive(3, 6),
+			exclusiveInclusive(1, 5),
+			exclusiveInclusive(5, 9),
+			exclusiveInclusive(7, 9),
+			exclusiveInclusive(9, 11),
+			exclusiveInclusive(8, 12),
+			exclusiveInclusive(2, 15)
 		)
 
 		val oldSelection = TextRange(5)
 		val newSelection = TextRange(9)
 
 		val expectedSpanStyles = listOf(
-			ParvenuString.Range(TestItem, 3, 10, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 1, 9, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 9, 13, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 11, 13, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 13, 15, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 12, 16, startInclusive = false, endInclusive = true),
-			ParvenuString.Range(TestItem, 2, 19, startInclusive = false, endInclusive = true)
+			exclusiveInclusive(3, 10),
+			exclusiveInclusive(1, 9),
+			exclusiveInclusive(9, 13),
+			exclusiveInclusive(11, 13),
+			exclusiveInclusive(13, 15),
+			exclusiveInclusive(12, 16),
+			exclusiveInclusive(2, 19)
 		)
 
 		val actualSpanStyles = oldSpanStyles.offsetSpansAccordingToSelectionChange(
@@ -74,9 +75,6 @@ public class TextAddTest {
 	}
 
 	private companion object {
-		val TestItem = object {
-			override fun toString(): String = "Item"
-		}
 		val TestTextChanged: (Int, Int) -> Boolean = { _, _ -> error("should not be called") }
 	}
 }
