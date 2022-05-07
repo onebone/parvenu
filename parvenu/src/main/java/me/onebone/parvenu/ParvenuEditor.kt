@@ -90,7 +90,7 @@ internal val ParagraphOnDeleteStart: (start: Int, end: Int) -> Boolean = { _, _ 
  *  oldSelection.max == newSelection.min. To mitigate this issue, we infer if only selection has
  *  changed or text has changed by comparing the string values. Although this method has a limitation
  *  where it cannot distinguish if pasted text is the same as the original one, it is not a common
- *  case?
+ *  case? Note that the lambda is only called when the old and new length are the same.
  * @param onDeleteStart If deleting a start of the span, the whole span is removed if the lambda
  *  returns `true`. This is needed to switch a strategy between span styles and paragraph styles.
  *  A span styles should be removed only if the range is empty, while a paragraph style should be
@@ -146,14 +146,17 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 					end -= min(removedLength, end - selMin)
 				}
 
-				if (addLength > 0 && addStart <= range.start) {
-					start += min(addLength, range.start - addStart)
+				if (addLength > 0 && addStart < range.start || (addStart == range.start && !range.startInclusive)) {
+					start += addLength
 				}
 
-				if (addLength > 0 && shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
-					end += addLength
-				} else if (addLength > 0 && addStart <= range.end) {
-					end += min(addLength, range.end - addStart)
+				if (addLength > 0) {
+					// The end offset should shift to the right if
+					// (1) cursor is in front the span's end offset or,
+					// (2) length of the span itself should expand.
+					if (addStart < range.end || shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
+						end += addLength
+					}
 				}
 
 				if (end < start) {
@@ -211,7 +214,15 @@ internal fun hasTextChanged(
 }
 
 /**
- * Returns `true` if the [range] should expand if a text is added at the [cursor].
+ * Returns `true` if the [range] should increase its length if a text is added at the [cursor].
+ *
+ * For example, consider the case where range = (3, 5].
+ * * 1) If cursor was at 3 and inserted text, then the span should not increase its length, but
+ *   only shift to the right because it is NOT start inclusive.
+ * * 2) If cursor was at 4 and inserted text, then the span should increase its length, because
+ *   the text was inserted in the middle of the span.
+ * * 3) If cursor was at 5 and inserted text, then the span should increase its length, because
+ *   the span is end inclusive.
  *
  * The behavior is slightly different from that of [ParvenuString.Range.contains], for
  * example, range=[3, 3), cursor=3, the range is empty but the given input returns true
