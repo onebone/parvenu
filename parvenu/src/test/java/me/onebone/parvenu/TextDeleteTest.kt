@@ -60,7 +60,7 @@ public class TextDeleteTest {
 			exclusiveInclusive(3, 5)
 		)
 
-		val oldSelection = TextRange(7)
+		val oldSelection = TextRange(4, 7)
 		val newSelection = TextRange(4)
 
 		val expectedSpanStyles = listOf(

@@ -117,7 +117,7 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 		val addLength = addEnd - addStart
 
 		val selMin = min(addStart, addEnd)
-		val selMax = max(addStart, addEnd)
+		val selMax = maxOf(addStart, addEnd, oldSelection.max)
 
 		val removedLength = if (oldSelection.collapsed) {
 			oldSelection.min - newSelection.min
@@ -138,50 +138,70 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 				)
 			} else {
 				var start = range.start
-				var end = range.end
 
-				if (removedLength > 0 && selMin < start) {
-					if (onDeleteStart(start, end)) return@mapNotNull null
+				var spanLength = range.length -
+						intersectLength(oldSelection.min, oldSelection.max, range.start, range.end)
 
-					start -= min(removedLength, start - selMin)
+				if (oldSelection.collapsed) {
+					if (removedLength > 0 && range.start < oldSelection.max && selMin < range.end) {
+						spanLength -= removedLength
+					}
 				}
 
-				if (removedLength > 0 && selMin < end) {
-					end -= min(removedLength, end - selMin)
+				if (removedLength > 0) {
+					if (newSelection.min < range.start && range.start <= oldSelection.min) {
+						if (onDeleteStart(range.start, range.end)) return@mapNotNull null
+					}
+
+					if (selMin < range.start) {
+						start = selMin
+					}
 				}
 
 				if (addLength > 0) {
-					val shouldExpandOnInsertion = shouldExpandSpanOnTextAddition(range, oldSelection.min)
-
-					// the case where selMax < range.start is already filtered above
-					if (addEnd <= range.start || !shouldExpandOnInsertion) {
-						start += addLength
+					if (shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
+						spanLength += addLength
 					}
 
-					// The end offset should shift to the right if
-					// (1) cursor is in front the span's end offset or,
-					// (2) length of the span itself should expand.
-					if (addStart < range.end || shouldExpandOnInsertion) {
-						end += addLength
+					if (addStart < range.start || !shouldExpandSpanOnTextAddition(range, oldSelection.min)) {
+						start += addLength
 					}
 				}
 
-				if (end < start) {
+				if (spanLength < 0) {
 					null
 				} else {
-					if (range.start == start && range.end == end) {
+					if (range.start == start && range.length == spanLength) {
 						range
-					} else if (start < range.start && range.end - range.start > 0 && start == end) {
+					} else if (start < range.start && range.length > 0 && spanLength == 0) {
 						// ORIGINAL: "ab{c[def]}g" --> [] = span, {} = cursor selection
 						// NEW     : "abg"
 						null
 					} else {
-						range.copy(start = start, end = end)
+						range.copy(start = start, end = start + spanLength)
 					}
 				}
 			}
 		}
 	}
+}
+
+/**
+ * An intersecting length between [[lStart], [lEnd]) and [[rStart], [rEnd]).
+ */
+internal fun intersectLength(
+	lStart: Int, lEnd: Int,
+	rStart: Int, rEnd: Int
+): Int {
+	if (rStart in lStart until lEnd) {
+		return min(rEnd, lEnd) - rStart
+	}
+
+	if (lStart in rStart until rEnd) {
+		return min(rEnd, lEnd) - lStart
+	}
+
+	return 0
 }
 
 /**

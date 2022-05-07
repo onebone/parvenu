@@ -37,6 +37,8 @@ public class ParvenuString(
 			}
 		}
 
+		val length: Int = end - start
+
 		public operator fun contains(index: Int): Boolean =
 			(start < index || (startInclusive && start == index))
 					&& (index < end || (endInclusive && end == index))
