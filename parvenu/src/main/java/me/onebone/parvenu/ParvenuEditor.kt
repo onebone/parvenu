@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import kotlin.math.max
 import kotlin.math.min
 
 @Composable
@@ -182,7 +181,12 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 						// NEW     : "abg"
 						null
 					} else {
-						range.copy(start = start, end = start + spanLength)
+						// if the span is deleted, then make it end inclusive
+						// ORIGINAL: "abc(def)|ghi" --> () = exclusive/exclusive span
+						// NEW     : "abc(de]|ghi"     --> (] = exclusive/inclusive span
+						val endInclusive = removedLength > 0 && oldSelection.max == range.end
+
+						range.copy(start = start, end = start + spanLength, endInclusive = range.endInclusive || endInclusive)
 					}
 				}
 			}

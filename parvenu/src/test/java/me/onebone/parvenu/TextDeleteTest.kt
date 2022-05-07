@@ -1,6 +1,7 @@
 package me.onebone.parvenu
 
 import androidx.compose.ui.text.TextRange
+import me.onebone.parvenu.util.exclusiveExclusive
 import me.onebone.parvenu.util.exclusiveInclusive
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -81,6 +82,34 @@ public class TextDeleteTest {
 
 		val actualSpanStyles = oldSpanStyles.offsetSpansAccordingToSelectionChange(
 			textLengthDelta = -3,
+			textChangedInRange = TestTextChanged,
+			oldSelection = oldSelection,
+			newSelection = newSelection,
+			onDeleteStart = SpanOnDeleteStart
+		)
+
+		assertEquals(expectedSpanStyles, actualSpanStyles)
+	}
+
+	@Test
+	public fun spanDeletingExclusiveExclusiveRangeMakesExclusiveInclusive() {
+		val oldSpanStyles = listOf(
+			exclusiveExclusive(4, 8),
+			exclusiveExclusive(4, 5),
+			exclusiveExclusive(3, 5)
+		)
+
+		val oldSelection = TextRange(5)
+		val newSelection = TextRange(4)
+
+		val expectedSpanStyles = listOf(
+			exclusiveExclusive(4, 7),
+			exclusiveInclusive(4, 4),
+			exclusiveInclusive(3, 4)
+		)
+
+		val actualSpanStyles = oldSpanStyles.offsetSpansAccordingToSelectionChange(
+			textLengthDelta = -1,
 			textChangedInRange = TestTextChanged,
 			oldSelection = oldSelection,
 			newSelection = newSelection,
