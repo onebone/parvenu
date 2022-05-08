@@ -124,6 +124,12 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 			oldSelection.length
 		}
 
+		val rmStart = if (oldSelection.collapsed) {
+			newSelection.min
+		} else {
+			oldSelection.min
+		}
+
 		mapNotNull { range ->
 			if (range.end < selMin) {
 				range
@@ -148,7 +154,7 @@ internal fun <T> List<ParvenuString.Range<T>>.offsetSpansAccordingToSelectionCha
 				}
 
 				if (removedLength > 0) {
-					if (newSelection.min < range.start && range.start <= oldSelection.min) {
+					if (rmStart < range.start && range.start <= rmStart + removedLength) {
 						if (onDeleteStart(range.start, range.end)) return@mapNotNull null
 					}
 
