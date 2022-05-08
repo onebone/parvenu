@@ -2,7 +2,7 @@
 A basic rich text editor support for Jetpack Compose
 
 ## What is this?
-The [bug](https://issuetracker.google.com/issues/199768107) prevents us to implement rich text editor for Jetpack Compose. As Compose's `BasicTextField` drops spans when it is edited by a user, the library *restores* them by inspecting selection and text change.
+The [bug](https://issuetracker.google.com/issues/199768107) prevents us from implementing a rich text editor for Jetpack Compose. As Compose's `BasicTextField` drops spans when it is edited by a user, the library *restores* them by inspecting selection and text change.
 You can try the demo app by running the `app` module.
 
 ![img](img/parvenu-preview.gif)
